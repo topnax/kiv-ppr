@@ -11,8 +11,8 @@
 #include <map>
 #include <limits>
 
-std::vector<double> load_doubles(char *file_name) {
-    int floats_to_read = 100;
+std::vector<double> load_doubles(char *file_name, int floats_per_read) {
+    size_t buffer_size = floats_per_read * sizeof (double);
 
     std::vector<double> doubles;
 
@@ -21,19 +21,22 @@ std::vector<double> load_doubles(char *file_name) {
     bool eof = false;
 
     // prepare a 8 byte buffer (for 64-bit float)
-    std::vector<char> buffer(NUMBER_SIZE, 0);
+    std::vector<char> buffer(buffer_size, 0);
 
     while (!eof) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
         // interpret the buffer as a double
-        double d = *((double *) &buffer[0]);
+        auto *read_doubles = (double *) buffer.data();
 
-        auto cls = fpclassify(d);
+        for (int i = 0; i < fin.gcount() / sizeof(double); i++) {
+            double d = read_doubles[i];
+            auto cls = fpclassify(d);
 
-        if (cls == FP_NORMAL || cls == FP_ZERO) {
-            doubles.push_back(d);
+            if (cls == FP_NORMAL || cls == FP_ZERO) {
+                doubles.push_back(d);
+            }
         }
 
         if (fin.gcount() < NUMBER_SIZE) eof = true;
@@ -74,7 +77,8 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
 
 int main(int argc, char *argv[]) {
     printf("Reading file...\n");
-    auto doubles = load_doubles(argv[1]);
+    int floats_per_read = atoi(argv[2]);
+    auto doubles = load_doubles(argv[1], floats_per_read);
     auto sorted_doubles = doubles;
     std::sort(sorted_doubles.begin(), sorted_doubles.end());
 
@@ -100,7 +104,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
-
-
-
