@@ -4,3 +4,5 @@ project(poc)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(poc main.cpp bucketing.h bucketing.cpp)
+
+add_executable(verifier verifier.cpp )
