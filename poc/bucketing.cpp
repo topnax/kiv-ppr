@@ -7,9 +7,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <cstring>
 #include <algorithm>
 #include <map>
+
+const unsigned long DOUBLE_FLOAT_EXPONENT_MASK = 0x7FF0000000000000;
+const unsigned long DOUBLE_FLOAT_MANTISSA_MASK = 0xFFFFFFFFFFFFF;
+
 
 std::pair<std::vector<long>, long> create_buckets(char *file_name) {
     std::vector<long> buckets(BUCKET_COUNT) ;
@@ -21,21 +24,31 @@ std::pair<std::vector<long>, long> create_buckets(char *file_name) {
     // prepare a 8 byte buffer (for 64-bit float)
     std::vector<char> buffer (NUMBER_SIZE, 0);
 
-    bool eof = false;
-
-    while(!eof) {
+    while (true) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
-        // TODO ignore numbers with exponents all 0s and all 1s
+        if (fin.gcount() < NUMBER_SIZE) break;
+
+        unsigned long content = *((unsigned long*) &buffer[0]);
+
+        // filter out SUBNORMAL, INFINITE or NAN numbers
+        auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
+        if (exponent == 0) {
+           if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0)  {
+               // SUBNORMAL
+               continue;
+           }
+        } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
+            // INFINITE / NAN
+            continue;
+        }
 
         // interpret the buffer as a long
-        unsigned long bucket_index = (*((unsigned long*) &buffer[0])) >> NUMBER_SHIFT;
+        unsigned long bucket_index = content >> NUMBER_SHIFT;
 
         buckets[bucket_index]++;
         buckets_total_items++;
-
-        if (fin.gcount() < NUMBER_SIZE) eof = true;
     }
 
     return std::pair(buckets, buckets_total_items);
@@ -45,13 +58,29 @@ std::pair<long, long> find_percentile_position(int percentile, std::vector<long>
     long percentile_position = buckets_total_items * ((double) percentile / (double) 100);
 
     long item_count = 0;
-    long bucket_index = 0;
 
-    printf("percentile_pos: %ld, buckets_total_items: %ld\n", percentile_position, buckets_total_items);
 
-    do {
-       item_count += buckets[bucket_index];
-    } while (percentile_position > item_count && ++bucket_index < buckets.size());
+    unsigned long bucket_index = buckets.size() - 1;
+    bool bucket_found = false;
+    // iterate over negative numbers in ascending order
+    for (; bucket_index > buckets.size() / 2; bucket_index--) {
+        item_count += buckets[bucket_index];
+        if (percentile_position < item_count) {
+            bucket_found = true;
+            break;
+        }
+    }
+
+    // iterate over positive numbers in ascending numbers
+    if (!bucket_found)  {
+        for (bucket_index = 0; bucket_index <= buckets.size() / 2; bucket_index++) {
+            item_count += buckets[bucket_index];
+            if (percentile_position < item_count) {
+                bucket_found = true;
+                break;
+            }
+        }
+    }
 
     long percentile_pos_in_bucket = percentile_position - (item_count - buckets[bucket_index]);
 
@@ -63,7 +92,6 @@ struct bucket_item {
     long lowest_index;
     long highest_index;
 };
-
 
 std::pair<double, std::pair<long, long>> find_percentile_value(long bucket, long percentile_position_in_bucket, char *file_name) {
     std::map<double, bucket_item*> numbers_in_bucket;
@@ -82,10 +110,24 @@ std::pair<double, std::pair<long, long>> find_percentile_value(long bucket, long
         fin.read(buffer.data(), buffer.size());
         std::streamsize s=fin.gcount();
 
-        // TODO ignore numbers with exponents all 0s and all 1s
+        if (s < NUMBER_SIZE) break;
+
+        unsigned long content = *((unsigned long*) &buffer[0]);
+
+        // filter out SUBNORMAL, INFINITE or NAN numbers
+        auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
+        if (exponent == 0) {
+            if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0)  {
+                // SUBNORMAL
+                continue;
+            }
+        } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
+            // INFINITE / NAN
+            continue;
+        }
 
         // interpret the buffer as a long
-        unsigned long bucket_index = (*((unsigned long*) &buffer[0])) >> NUMBER_SHIFT;
+        unsigned long bucket_index = content >> NUMBER_SHIFT;
 
         if (bucket_index == bucket) {
             double number = *((double*) &buffer[0]) ;
@@ -128,5 +170,3 @@ std::pair<double, std::pair<long, long>> find_percentile_value(long bucket, long
 
     return std::pair(result_key, std::pair(result_item->lowest_index, result_item->highest_index));
 }
-
-
