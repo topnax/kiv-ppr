@@ -76,7 +76,6 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
 }
 
 int main(int argc, char *argv[]) {
-    printf("Reading file...\n");
     int floats_per_read = atoi(argv[2]);
     auto doubles = load_doubles(argv[1], floats_per_read);
     auto sorted_doubles = doubles;
@@ -87,19 +86,15 @@ int main(int argc, char *argv[]) {
     std::vector<double> percentile_values(percentiles.size());
     std::vector<std::pair<long, long>> percentile_indices(percentiles.size());
 
-    printf("Finding percentiles...\n");
     for (int i = 0; i < percentiles.size(); i++) {
         percentile_values[i] = find_percentile(percentiles[i], sorted_doubles);
     }
 
-    printf("Finding indices...\n");
     auto indices = find_indices(percentile_values, doubles);
 
     for (int i = 0; i < percentiles.size(); i++) {
         auto result = indices[i];
-        std::wcout <<
-        "Percentilex for " << percentiles[i] << ": " << percentile_values[i] <<
-        " " << result.first << ":" << result.second << std::endl;
+        std::wcout << percentiles[i] << ". " << percentile_values[i] << " " << result.first << " " << result.second << std::endl;
     }
 
     return 0;
