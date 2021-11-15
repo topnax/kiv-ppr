@@ -21,34 +21,39 @@ std::pair<std::vector<long>, long> create_buckets(char *file_name) {
     // open file stream
     std::ifstream fin(file_name, std::ifstream::in | std::ifstream::binary);
 
-    // prepare a 8 byte buffer (for 64-bit float)
-    std::vector<char> buffer (NUMBER_SIZE, 0);
+    // prepare a buffer based on the NUMBER_SIZE and NUMBER_BUFFER_SIZE constants
+    std::vector<char> buffer (NUMBER_SIZE * NUMBER_BUFFER_SIZE, 0);
 
     while (true) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
-        if (fin.gcount() < NUMBER_SIZE) break;
+        // calculate how many float numbers were read
+        auto numbers_read = fin.gcount() / NUMBER_SIZE;
 
-        unsigned long content = *((unsigned long*) &buffer[0]);
+        if (numbers_read < 1) break;
 
-        // filter out SUBNORMAL, INFINITE or NAN numbers
-        auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
-        if (exponent == 0) {
-           if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0)  {
-               // SUBNORMAL
-               continue;
-           }
-        } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
-            // INFINITE / NAN
-            continue;
+        for (int i = 0; i < numbers_read; ++i) {
+            unsigned long content = *((unsigned long*) &buffer[i * (NUMBER_SIZE / sizeof(char))]);
+
+            // filter out SUBNORMAL, INFINITE or NAN numbers
+            auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
+            if (exponent == 0) {
+                if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0)  {
+                    // SUBNORMAL
+                    continue;
+                }
+            } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
+                // INFINITE / NAN
+                continue;
+            }
+
+            // interpret the buffer as a long
+            unsigned long bucket_index = content >> NUMBER_SHIFT;
+
+            buckets[bucket_index]++;
+            buckets_total_items++;
         }
-
-        // interpret the buffer as a long
-        unsigned long bucket_index = content >> NUMBER_SHIFT;
-
-        buckets[bucket_index]++;
-        buckets_total_items++;
     }
 
     return std::pair(buckets, buckets_total_items);
@@ -99,60 +104,61 @@ std::pair<double, std::pair<long, long>> find_percentile_value(long bucket, long
     // open file stream
     std::ifstream fin(file_name, std::ifstream::binary);
 
-    // prepare a 8 byte buffer (for 64-bit float)
-    std::vector<char> buffer (NUMBER_SIZE, 0);
+    // prepare a buffer based on the NUMBER_SIZE and NUMBER_BUFFER_SIZE constants
+    std::vector<char> buffer (NUMBER_SIZE * NUMBER_BUFFER_SIZE, 0);
 
     long index = 0;
-    bool eof = false;
 
-    while(!eof) {
+    while(true) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
-        std::streamsize s=fin.gcount();
 
-        if (s < NUMBER_SIZE) break;
+        // calculate how many float numbers were read
+        auto numbers_read = fin.gcount() / NUMBER_SIZE;
 
-        unsigned long content = *((unsigned long*) &buffer[0]);
+        if (numbers_read < 1) break;
 
-        // filter out SUBNORMAL, INFINITE or NAN numbers
-        auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
-        if (exponent == 0) {
-            if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0)  {
-                // SUBNORMAL
+        for (int i = 0; i < numbers_read; ++i) {
+            unsigned long content = *((unsigned long *) &buffer[i * (NUMBER_SIZE / sizeof(char))]);
+
+            // filter out SUBNORMAL, INFINITE or NAN numbers
+            auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
+            if (exponent == 0) {
+                if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0) {
+                    // SUBNORMAL
+                    continue;
+                }
+            } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
+                // INFINITE / NAN
                 continue;
             }
-        } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
-            // INFINITE / NAN
-            continue;
-        }
 
-        // interpret the buffer as a long
-        unsigned long bucket_index = content >> NUMBER_SHIFT;
+            // interpret the buffer as a long
+            unsigned long bucket_index = content >> NUMBER_SHIFT;
 
-        if (bucket_index == bucket) {
-            double number = *((double*) &buffer[0]) ;
-            auto pos = numbers_in_bucket.find(number);
-            if (pos == numbers_in_bucket.end()) {
-                bucket_item* item = new bucket_item;
-                item->count = 1;
-                item->lowest_index = index;
-                item->highest_index = index;
-                numbers_in_bucket[number] = item;
-            } else {
-                auto item = pos->second;
-                item->count = item->count + 1;
-                if (item->lowest_index > index) {
-                   item->lowest_index = index;
-                }
-                if (item->highest_index < index) {
+            if (bucket_index == bucket) {
+                double number = *((double *) &buffer[i * (NUMBER_SIZE / sizeof(char))]);
+                auto pos = numbers_in_bucket.find(number);
+                if (pos == numbers_in_bucket.end()) {
+                    bucket_item *item = new bucket_item;
+                    item->count = 1;
+                    item->lowest_index = index;
                     item->highest_index = index;
+                    numbers_in_bucket[number] = item;
+                } else {
+                    auto item = pos->second;
+                    item->count = item->count + 1;
+                    if (item->lowest_index > index) {
+                        item->lowest_index = index;
+                    }
+                    if (item->highest_index < index) {
+                        item->highest_index = index;
+                    }
                 }
             }
+
+            index++;
         }
-
-        if (fin.gcount() < NUMBER_SIZE) eof = true;
-
-        index++;
     }
 
     long sum = 0;

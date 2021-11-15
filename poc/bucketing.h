@@ -8,6 +8,7 @@
 #ifndef POC_BUCKETING_H
 #define POC_BUCKETING_H
 
+const int NUMBER_BUFFER_SIZE = 1000;
 const int NUMBER_SIZE = 8;
 const int NUMBER_SHIFT = 44;
 const int BUCKET_KEY_LENGTH_BITS = (NUMBER_SIZE * 8) - NUMBER_SHIFT;
