@@ -140,7 +140,7 @@ std::pair<double, std::pair<long, long>> find_percentile_value(long bucket, long
                 double number = *((double *) &buffer[i * (NUMBER_SIZE / sizeof(char))]);
                 auto pos = numbers_in_bucket.find(number);
                 if (pos == numbers_in_bucket.end()) {
-                    bucket_item *item = new bucket_item;
+                    bucket_item *item = new bucket_item; // TODO delete
                     item->count = 1;
                     item->lowest_index = index;
                     item->highest_index = index;
