@@ -39,7 +39,7 @@ std::vector<double> load_doubles(char *file_name, int floats_per_read) {
             }
         }
 
-        if (fin.gcount() < NUMBER_SIZE) eof = true;
+        if (fin.gcount() < NUMBER_SIZE_BYTES) eof = true;
     }
 
     return doubles;
