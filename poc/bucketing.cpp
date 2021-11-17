@@ -28,10 +28,10 @@ std::pair<std::vector<long>, long> create_buckets(char *file_name) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
+        if (fin.gcount() < NUMBER_SIZE) break;
+
         // calculate how many float numbers were read
         auto numbers_read = fin.gcount() / NUMBER_SIZE;
-
-        if (numbers_read < 1) break;
 
         for (int i = 0; i < numbers_read; ++i) {
             unsigned long content = *((unsigned long*) &buffer[i * (NUMBER_SIZE / sizeof(char))]);
@@ -113,10 +113,10 @@ std::pair<double, std::pair<long, long>> find_percentile_value(long bucket, long
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
+        if (fin.gcount() < NUMBER_SIZE) break;
+
         // calculate how many float numbers were read
         auto numbers_read = fin.gcount() / NUMBER_SIZE;
-
-        if (numbers_read < 1) break;
 
         for (int i = 0; i < numbers_read; ++i) {
             unsigned long content = *((unsigned long *) &buffer[i * (NUMBER_SIZE / sizeof(char))]);
