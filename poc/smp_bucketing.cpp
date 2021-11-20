@@ -60,17 +60,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
             // convert data to an unsigned long
             uint64_t content = *((uint64_t *) &data[i * (NUMBER_SIZE_BYTES / sizeof(char))]);
 
-            // filter out SUBNORMAL, INFINITE or NAN numbers
-            auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
-            if (exponent == 0) {
-                if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0) {
-                    // SUBNORMAL
-                    continue;
-                }
-            } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
-                // INFINITE / NAN
-                continue;
-            }
+            if (!is_valid_double(content)) continue;
 
             // calculate the bucket index
             unsigned long bucket_index = content >> NUMBER_SHIFT;
@@ -113,4 +103,60 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
 }
 
 // TODO implement SMP file pruning in order to get the actual percentile value
+struct bucket_item {
+    uint64_t count;
+    uint64_t lowest_index;
+    uint64_t highest_index;
+};
 
+std::pair<double, std::pair<uint64_t, uint64_t>> find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name) {
+    // open input file stream
+    std::ifstream fin(file_name, std::ifstream::in | std::ifstream::binary);
+
+    // prepare input_node buffer for reading from the file
+    std::vector<char> buffer(NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE, 0);
+
+    tbb::flow::graph g;
+
+    // define an input node that reads from input_node file
+    tbb::flow::input_node<std::vector<char>> input_node(g, [&](std::vector<char> &out) {
+        // read from the file stream
+        fin.read(buffer.data(), buffer.size());
+
+        // check whether eof has been reached
+        if (fin.gcount() < NUMBER_SIZE_BYTES) {
+            return false;
+        }
+
+        // send the read data to the next nodes
+        out = std::vector<char>(buffer.begin(), buffer.begin() + fin.gcount());
+
+        return true;
+    });
+
+    // define input_node multifunction_node type (so that one node can produce multiple items)
+    using node_t = tbb::flow::multifunction_node<std::vector<char>, std::tuple<uint64_t>>;
+
+    node_t processing_node(g, tbb::flow::unlimited, [&bucket](std::vector<char> data, node_t::output_ports_type &p) {
+
+        // determine how many numbers have been read
+        auto numbers_read = data.size() / NUMBER_SIZE_BYTES;
+
+        // iterate over numbers read
+        for (int i = 0; i < numbers_read; ++i) {
+            // convert data to an unsigned long
+            uint64_t content = *((uint64_t *) &data[i * (NUMBER_SIZE_BYTES / sizeof(char))]);
+
+            if (!is_valid_double(content)) continue;
+
+            // calculate the bucket index
+            uint64_t bucket_index = content >> NUMBER_SHIFT;
+
+            if (bucket_index == bucket) {
+                // TODO this number belongs to the bucket we are analysing
+            }
+        }
+    });
+
+    return std::pair(2.0, std::pair(1,1));
+}

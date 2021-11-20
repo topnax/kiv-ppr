@@ -15,9 +15,9 @@
 
 
 struct bucket_item {
-    long count;
-    long lowest_index;
-    long highest_index;
+    uint64_t count;
+    uint64_t lowest_index;
+    uint64_t highest_index;
 };
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets(char *file_name) {
