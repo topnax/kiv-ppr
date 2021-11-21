@@ -43,7 +43,7 @@ std::vector<double> load_doubles(char *file_name, int floats_per_read) {
 }
 
 double find_percentile(int percentile, std::vector<double> &doubles) {
-    return doubles[doubles.size() * ((double) percentile / (double) 100)];
+    return doubles[(doubles.size() - 1) * ((double) percentile / (double) 100)];
 }
 
 std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std::vector<double> &doubles) {
@@ -59,16 +59,15 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
         for (int i = 0; i < values.size(); i++) {
             auto v = values[i];
             if (d == v) {
-                if (index < result[i].first) {
+                if (index * 8 < result[i].first) {
                     result[i].first = index * 8;
                 }
-                if (index > result[i].second) {
+                if (index * 8 > result[i].second) {
                     result[i].second = index * 8;
                 }
             }
         }
     }
-
     return result;
 }
 
@@ -102,7 +101,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < percentiles.size(); i++) {
         auto result = indices[i];
-        std::wcout << percentiles[i] << ". " << percentile_values[i] << " " << result.first << " " << result.second << std::endl;
+        std::wcout << std::hexfloat << percentiles[i] << ". " << percentile_values[i] << " " << result.first << " " << result.second << std::endl;
     }
 
     return 0;

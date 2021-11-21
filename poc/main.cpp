@@ -43,7 +43,7 @@ void process_file(char *file_name, int percentile) {
                 percentile_pos_in_bucket_and_bucket_index.second,
                 percentile_pos_in_bucket_and_bucket_index.first, file_name
         );
-        std::wcout << result.first << " " << result.second.first << " " << result.second.second << std::endl;
+        std::wcout << std::hexfloat << result.first << " " << result.second.first << " " << result.second.second << std::endl;
     }
 }
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     int percentile = atoi(argv[2]);
 
     process_file(argv[1], percentile);
-    process_file_smp(argv[1], percentile);
+    //process_file_smp(argv[1], percentile);
 
     return 0;
 }

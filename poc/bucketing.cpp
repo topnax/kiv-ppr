@@ -176,6 +176,13 @@ std::pair<double, std::pair<uint64_t, uint64_t >> find_percentile_value(uint64_t
     auto result_item = numbers_in_bucket.begin()->second;
     for (auto const& [key, val] : numbers_in_bucket)
     {
+     //   std::wcout
+     //           << "key: " << key
+     //           << ", val: " << val->count
+     //           << ", lowest_index: " << val->lowest_index
+     //           << ", highest_index: " << val->highest_index
+     //           << std::endl;
+
         if (sum >= percentile_position_in_bucket) {
             result_key = key;
             result_item = val;

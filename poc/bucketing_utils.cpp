@@ -6,7 +6,7 @@
 #include "bucketing_constants.h"
 
 std::pair<uint64_t , uint64_t > find_percentile_position(int percentile, std::vector<uint64_t > buckets, uint64_t  buckets_total_items) {
-    uint64_t  percentile_position = buckets_total_items * ((double) percentile / (double) 100);
+    uint64_t  percentile_position = (buckets_total_items - 1) * ((double) percentile / (double) 100);
 
     uint64_t  item_count = 0;
 

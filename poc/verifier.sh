@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAIVE_OUT_FILE="verifier.out"
-NAIVE_FLOATS_PER_READ=50
+NAIVE_FLOATS_PER_READ=1000
 
 IMPL_OUT_FILE="impl.out"
 
