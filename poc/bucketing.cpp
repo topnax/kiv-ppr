@@ -158,7 +158,7 @@ std::pair<double, std::pair<uint64_t, uint64_t >> find_percentile_value(uint64_t
             uint64_t bucket_index = content >> NUMBER_SHIFT;
 
             if (bucket_index == bucket) {
-                double number = *((double *) &buffer[i * (NUMBER_SIZE_BYTES / sizeof(char))]);
+                auto number = *((double*) &content);
                 auto pos = numbers_in_bucket.find(number);
                 if (pos == numbers_in_bucket.end()) {
                     bucket_item *item = new bucket_item; // TODO delete
@@ -240,7 +240,7 @@ std::pair<double, std::pair<uint64_t, uint64_t>> find_percentile_value_subbucket
                 uint64_t sub_bucket_index = (content & SUB_BUCKET_MANTISSA_MASK) >> SUB_BUCKET_SHIFT;
 
                 if (sub_bucket_index == subbucket) {
-                    double number = *((double *) &buffer[i * (NUMBER_SIZE_BYTES / sizeof(char))]);
+                    auto number = *((double*) &content);
                     auto pos = numbers_in_bucket.find(number);
                     if (pos == numbers_in_bucket.end()) {
                         bucket_item *item = new bucket_item; // TODO delete
