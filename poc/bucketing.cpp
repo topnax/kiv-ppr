@@ -142,42 +142,31 @@ std::pair<double, std::pair<uint64_t, uint64_t >> find_percentile_value(uint64_t
         for (int i = 0; i < numbers_read; ++i) {
             uint64_t content = *((uint64_t *) &buffer[i * (NUMBER_SIZE_BYTES / sizeof(char))]);
 
-            // filter out SUBNORMAL, INFINITE or NAN numbers
-            auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
-            if (exponent == 0) {
-                if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0) {
-                    // SUBNORMAL
-                    continue;
-                }
-            } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
-                // INFINITE / NAN
-                continue;
-            }
+            if (is_valid_double(content)) {
+                // interpret the buffer as a long
+                uint64_t bucket_index = content >> NUMBER_SHIFT;
 
-            // interpret the buffer as a long
-            uint64_t bucket_index = content >> NUMBER_SHIFT;
-
-            if (bucket_index == bucket) {
-                auto number = *((double*) &content);
-                auto pos = numbers_in_bucket.find(number);
-                if (pos == numbers_in_bucket.end()) {
-                    bucket_item *item = new bucket_item; // TODO delete
-                    item->count = 1;
-                    item->lowest_index = index;
-                    item->highest_index = index;
-                    numbers_in_bucket[number] = item;
-                } else {
-                    auto item = pos->second;
-                    item->count = item->count + 1;
-                    if (item->lowest_index > index) {
+                if (bucket_index == bucket) {
+                    auto number = *((double *) &content);
+                    auto pos = numbers_in_bucket.find(number);
+                    if (pos == numbers_in_bucket.end()) {
+                        bucket_item *item = new bucket_item; // TODO delete
+                        item->count = 1;
                         item->lowest_index = index;
-                    }
-                    if (item->highest_index < index) {
                         item->highest_index = index;
+                        numbers_in_bucket[number] = item;
+                    } else {
+                        auto item = pos->second;
+                        item->count = item->count + 1;
+                        if (item->lowest_index > index) {
+                            item->lowest_index = index;
+                        }
+                        if (item->highest_index < index) {
+                            item->highest_index = index;
+                        }
                     }
                 }
             }
-
             index++;
         }
     }
@@ -221,46 +210,35 @@ std::pair<double, std::pair<uint64_t, uint64_t>> find_percentile_value_subbucket
         for (int i = 0; i < numbers_read; ++i) {
             uint64_t content = *((uint64_t *) &buffer[i * (NUMBER_SIZE_BYTES / sizeof(char))]);
 
-            // filter out SUBNORMAL, INFINITE or NAN numbers
-            auto exponent = content & DOUBLE_FLOAT_EXPONENT_MASK;
-            if (exponent == 0) {
-                if ((content & DOUBLE_FLOAT_MANTISSA_MASK) != 0) {
-                    // SUBNORMAL
-                    continue;
-                }
-            } else if (exponent == DOUBLE_FLOAT_EXPONENT_MASK) {
-                // INFINITE / NAN
-                continue;
-            }
+            if (is_valid_double(content)) {
+                // interpret the buffer as a long
+                uint64_t bucket_index = content >> NUMBER_SHIFT;
 
-            // interpret the buffer as a long
-            uint64_t bucket_index = content >> NUMBER_SHIFT;
+                if (bucket_index == bucket) {
+                    uint64_t sub_bucket_index = (content & SUB_BUCKET_MANTISSA_MASK) >> SUB_BUCKET_SHIFT;
 
-            if (bucket_index == bucket) {
-                uint64_t sub_bucket_index = (content & SUB_BUCKET_MANTISSA_MASK) >> SUB_BUCKET_SHIFT;
-
-                if (sub_bucket_index == subbucket) {
-                    auto number = *((double*) &content);
-                    auto pos = numbers_in_bucket.find(number);
-                    if (pos == numbers_in_bucket.end()) {
-                        bucket_item *item = new bucket_item; // TODO delete
-                        item->count = 1;
-                        item->lowest_index = index;
-                        item->highest_index = index;
-                        numbers_in_bucket[number] = item;
-                    } else {
-                        auto item = pos->second;
-                        item->count = item->count + 1;
-                        if (item->lowest_index > index) {
+                    if (sub_bucket_index == subbucket) {
+                        auto number = *((double *) &content);
+                        auto pos = numbers_in_bucket.find(number);
+                        if (pos == numbers_in_bucket.end()) {
+                            bucket_item *item = new bucket_item; // TODO delete
+                            item->count = 1;
                             item->lowest_index = index;
-                        }
-                        if (item->highest_index < index) {
                             item->highest_index = index;
+                            numbers_in_bucket[number] = item;
+                        } else {
+                            auto item = pos->second;
+                            item->count = item->count + 1;
+                            if (item->lowest_index > index) {
+                                item->lowest_index = index;
+                            }
+                            if (item->highest_index < index) {
+                                item->highest_index = index;
+                            }
                         }
                     }
                 }
             }
-
             index++;
         }
     }

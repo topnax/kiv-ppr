@@ -33,11 +33,7 @@ std::vector<double> load_doubles(char *file_name, int floats_per_read) {
 
         for (int i = 0; i < fin.gcount() / sizeof(double); i++) {
             double d = read_doubles[i];
-            auto cls = std::fpclassify(d);
-
-            if (cls == FP_NORMAL || cls == FP_ZERO) {
-                doubles.push_back(d);
-            }
+            doubles.push_back(d);
         }
 
         if (fin.gcount() < NUMBER_SIZE_BYTES) eof = true;
@@ -79,8 +75,19 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
 int main(int argc, char *argv[]) {
     int floats_per_read = atoi(argv[2]);
     auto doubles = load_doubles(argv[1], floats_per_read);
-    auto sorted_doubles = doubles;
-    std::sort(sorted_doubles.begin(), sorted_doubles.end());
+    auto filtered_doubles = std::vector<double>();
+    // filter doubles that are not a valid double
+    std::copy_if(doubles.begin(), doubles.end(), std::back_inserter(filtered_doubles),
+                 [](const double d)
+                 {
+                     auto cls = std::fpclassify(d);
+                     if (cls == FP_NORMAL || cls == FP_ZERO) {
+                         return true;
+                     }
+                     return false;
+                 });
+    // sort filtered doubles
+    std::sort(filtered_doubles.begin(), filtered_doubles.end());
 
     std::vector<int> percentiles = {10, 20, 30, 40, 50, 60, 70, 80, 90};
 
@@ -88,7 +95,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::pair<long, long>> percentile_indices(percentiles.size());
 
     for (int i = 0; i < percentiles.size(); i++) {
-        percentile_values[i] = find_percentile(percentiles[i], sorted_doubles);
+        percentile_values[i] = find_percentile(percentiles[i], filtered_doubles);
     }
 
     auto indices = find_indices(percentile_values, doubles);
