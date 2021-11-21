@@ -3,6 +3,7 @@
 //
 
 #include "bucketing.h"
+#include "bucketing_constants.h"
 
 #include <iostream>
 #include <fstream>
@@ -32,7 +33,7 @@ std::vector<double> load_doubles(char *file_name, int floats_per_read) {
 
         for (int i = 0; i < fin.gcount() / sizeof(double); i++) {
             double d = read_doubles[i];
-            auto cls = fpclassify(d);
+            auto cls = std::fpclassify(d);
 
             if (cls == FP_NORMAL || cls == FP_ZERO) {
                 doubles.push_back(d);
@@ -63,10 +64,10 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
             auto v = values[i];
             if (d == v) {
                 if (index < result[i].first) {
-                    result[i].first = index;
+                    result[i].first = index * 8;
                 }
                 if (index > result[i].second) {
-                    result[i].second = index;
+                    result[i].second = index * 8;
                 }
             }
         }

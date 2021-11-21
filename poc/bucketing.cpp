@@ -195,7 +195,7 @@ std::pair<double, std::pair<uint64_t, uint64_t >> find_percentile_value(uint64_t
         sum += val->count;
     }
 
-    return std::pair(result_key, std::pair(result_item->lowest_index, result_item->highest_index));
+    return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
 }
 
 std::pair<double, std::pair<uint64_t, uint64_t>> find_percentile_value_subbucket(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name, uint64_t subbucket) {
@@ -283,5 +283,5 @@ std::pair<double, std::pair<uint64_t, uint64_t>> find_percentile_value_subbucket
         sum += val->count;
     }
 
-    return std::pair(result_key, std::pair(result_item->lowest_index, result_item->highest_index));
+    return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
 }
