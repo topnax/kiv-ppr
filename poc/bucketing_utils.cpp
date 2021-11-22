@@ -6,14 +6,14 @@
 #include "bucketing_constants.h"
 
 std::pair<uint64_t , uint64_t > find_percentile_position(int percentile, std::vector<uint64_t > buckets, uint64_t  buckets_total_items) {
-    uint64_t  percentile_position = (buckets_total_items - 1) * ((double) percentile / (double) 100);
+    uint64_t percentile_position = (buckets_total_items - 1) * ((double) percentile / (double) 100);
 
-    uint64_t  item_count = 0;
+    uint64_t item_count = 0;
 
     uint64_t bucket_index = buckets.size() - 1;
     bool bucket_found = false;
     // iterate over negative numbers in ascending order
-    for (; bucket_index > buckets.size() / 2; bucket_index--) {
+    for (; bucket_index >= buckets.size() / 2; bucket_index--) {
         item_count += buckets[bucket_index];
         if (percentile_position < item_count) {
             bucket_found = true;
@@ -23,7 +23,7 @@ std::pair<uint64_t , uint64_t > find_percentile_position(int percentile, std::ve
 
     // iterate over positive numbers in ascending numbers
     if (!bucket_found) {
-        for (bucket_index = 0; bucket_index <= buckets.size() / 2; bucket_index++) {
+        for (bucket_index = 0; bucket_index < buckets.size() / 2; bucket_index++) {
             item_count += buckets[bucket_index];
             if (percentile_position < item_count) {
                 bucket_found = true;
@@ -32,7 +32,7 @@ std::pair<uint64_t , uint64_t > find_percentile_position(int percentile, std::ve
         }
     }
 
-    uint64_t  percentile_pos_in_bucket = percentile_position - (item_count - buckets[bucket_index]);
+    uint64_t percentile_pos_in_bucket = percentile_position - (item_count - buckets[bucket_index]);
 
     return std::pair(percentile_pos_in_bucket, bucket_index);
 }
