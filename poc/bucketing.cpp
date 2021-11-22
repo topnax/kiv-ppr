@@ -174,21 +174,13 @@ std::pair<double, std::pair<uint64_t, uint64_t >> find_percentile_value(uint64_t
     uint64_t sum = 0;
     auto result_key = numbers_in_bucket.begin()->first;
     auto result_item = numbers_in_bucket.begin()->second;
-    for (auto const& [key, val] : numbers_in_bucket)
-    {
-     //   std::wcout
-     //           << "key: " << key
-     //           << ", val: " << val->count
-     //           << ", lowest_index: " << val->lowest_index
-     //           << ", highest_index: " << val->highest_index
-     //           << std::endl;
-
-        if (sum >= percentile_position_in_bucket) {
+    for (auto const&[key, val] : numbers_in_bucket) {
+        sum += val->count;
+        if (sum > percentile_position_in_bucket) {
             result_key = key;
             result_item = val;
             break;
         }
-        sum += val->count;
     }
 
     return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
@@ -250,22 +242,17 @@ std::pair<double, std::pair<uint64_t, uint64_t>> find_percentile_value_subbucket
         }
     }
 
-    uint64_t sum = 0;
     auto result_key = numbers_in_bucket.begin()->first;
     auto result_item = numbers_in_bucket.begin()->second;
-    for (auto const& [key, val] : numbers_in_bucket)
-    {
-        auto result = std::pair(result_key, std::pair(result_item->lowest_index, result_item->highest_index));
-    }
+    uint64_t sum = 0;
 
-    for (auto const& [key, val] : numbers_in_bucket)
-    {
-        if (sum >= percentile_position_in_bucket) {
+    for (auto const&[key, val] : numbers_in_bucket) {
+        sum += val->count;
+        if (sum > percentile_position_in_bucket) {
             result_key = key;
             result_item = val;
             break;
         }
-        sum += val->count;
     }
 
     return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
