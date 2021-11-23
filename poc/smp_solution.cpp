@@ -2,12 +2,10 @@
 // Created by topnax on 20.11.21.
 //
 
-#include <iostream>
-#include <tbb/concurrent_vector.h>
+#include "solution.h"
 #include "smp_solution.h"
 #include "bucketing_utils.h"
 #include "smp_bucketing.h"
-#include <chrono>
 
 
 solution_result process_file_smp(char *file_name, int percentile) {

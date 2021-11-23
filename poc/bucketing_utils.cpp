@@ -68,7 +68,3 @@ std::pair<uint64_t , uint64_t > find_percentile_position_in_subbucket(uint64_t p
 
     return std::pair(percentile_pos_in_bucket, bucket_index);
 }
-
-void print_solution_result(solution_result result) {
-    std::wcout << std::hexfloat << result.first << " " << result.second.first << " " << result.second.second << std::endl;
-}

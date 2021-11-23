@@ -1,13 +1,11 @@
 //
 // Created by topnax on 16.11.21.
 //
+#pragma once
 
 #include <iostream>
 #include <vector>
-#include "bucketing.h"
-
-#ifndef POC_BUFFEREDREADER_H
-#define POC_BUFFEREDREADER_H
+#include "serial_bucketing.h"
 
 
 class BufferedReader {
@@ -30,6 +28,3 @@ public:
 private:
 
 };
-
-
-#endif //POC_BUFFEREDREADER_H

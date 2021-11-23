@@ -1,14 +1,12 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(poc)
 
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(poc
         main.cpp
-        bucketing.h
-        bucketing.cpp
-        BufferedReader.cpp
-        BufferedReader.h
+        serial_bucketing.h
+        serial_bucketing.cpp
         smp_solution.cpp
         smp_solution.h
         smp_bucketing.h
@@ -17,7 +15,10 @@ add_executable(poc
         bucketing_utils.cpp
         bucketing_utils.h
         bucketing_constants.h
-        )
+        serial_solution.h
+        serial_solution.cpp
+        solution.h
+        solution.cpp)
 
 add_executable(verifier verifier.cpp)
 

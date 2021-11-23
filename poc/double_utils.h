@@ -1,9 +1,7 @@
 //
 // Created by topnax on 20.11.21.
 //
-
-#ifndef POC_DOUBLE_UTILS_H
-#define POC_DOUBLE_UTILS_H
+#pragma once
 
 
 const unsigned long DOUBLE_FLOAT_EXPONENT_MASK = 0x7FF0000000000000;
@@ -23,5 +21,3 @@ inline bool is_valid_double(uint64_t num) {
     }
     return true;
 }
-
-#endif //POC_DOUBLE_UTILS_H

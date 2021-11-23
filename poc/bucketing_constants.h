@@ -1,12 +1,11 @@
 //
 // Created by topnax on 20.11.21.
 //
+#pragma once
+
 #include <vector>
 #include <cstdint>
 #include <cmath>
-
-#ifndef POC_SMP_BUCKETING_CONSTANTS_H
-#define POC_SMP_BUCKETING_CONSTANTS_H
 
 // size of the number buffer when reading from a file
 const int NUMBER_BUFFER_SIZE = 1000;
@@ -53,5 +52,3 @@ const unsigned long MEMORY_LIMIT = MEBI_BYTE * 250;
 
 // TODO incorrect bucket count
 const unsigned long MAX_BUCKET_COUNT = (unsigned long) ((double) MEMORY_LIMIT * 0.8);
-
-#endif //POC_SMP_BUCKETING_CONSTANTS_H

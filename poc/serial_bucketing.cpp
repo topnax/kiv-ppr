@@ -2,7 +2,7 @@
 // Created by topnax on 10.10.21.
 //
 
-#include "bucketing.h"
+#include "serial_bucketing.h"
 #include "bucketing_constants.h"
 #include "double_utils.h"
 
@@ -20,7 +20,7 @@ struct bucket_item {
     uint64_t highest_index;
 };
 
-std::pair<std::vector<uint64_t>, uint64_t> create_buckets(char *file_name) {
+std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name) {
     std::vector<uint64_t> buckets(BUCKET_COUNT);
     uint64_t buckets_total_items = 0;
 
@@ -65,7 +65,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets(char *file_name) {
     return std::pair(buckets, buckets_total_items);
 }
 
-std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets(char *file_name, uint64_t base_bucket_index) {
+std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_name, uint64_t base_bucket_index) {
     std::vector<uint64_t> sub_buckets(SUB_BUCKET_COUNT);
     uint64_t buckets_total_items = 0;
 
@@ -120,7 +120,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets(char *file_name, u
 }
 
 std::pair<double, std::pair<uint64_t, uint64_t >>
-find_percentile_value(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name) {
+find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name) {
     std::map<double, bucket_item *> numbers_in_bucket;
 
     // open file stream
@@ -188,7 +188,7 @@ find_percentile_value(uint64_t bucket, uint64_t percentile_position_in_bucket, c
 }
 
 std::pair<double, std::pair<uint64_t, uint64_t>>
-find_percentile_value_subbucket(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name,
+find_percentile_value_subbucket_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name,
                                 uint64_t subbucket) {
     std::map<double, bucket_item *> numbers_in_bucket;
 
