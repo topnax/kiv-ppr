@@ -5,7 +5,8 @@
 #ifndef POC_SMP_SOLUTION_H
 #define POC_SMP_SOLUTION_H
 
-void process_file_smp(char *out, int percentile);
+#include "bucketing_utils.h"
 
+solution_result process_file_smp(char *out, int percentile);
 
 #endif //POC_SMP_SOLUTION_H

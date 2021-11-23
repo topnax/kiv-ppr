@@ -2,6 +2,8 @@
 // Created by topnax on 20.11.21.
 //
 
+#include <iostream>
+#include <ios>
 #include "bucketing_utils.h"
 #include "bucketing_constants.h"
 
@@ -65,4 +67,8 @@ std::pair<uint64_t , uint64_t > find_percentile_position_in_subbucket(uint64_t p
     uint64_t percentile_pos_in_bucket = percentile_position - (item_count - buckets[bucket_index]);
 
     return std::pair(percentile_pos_in_bucket, bucket_index);
+}
+
+void print_solution_result(solution_result result) {
+    std::wcout << std::hexfloat << result.first << " " << result.second.first << " " << result.second.second << std::endl;
 }

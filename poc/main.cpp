@@ -11,7 +11,7 @@
 #include<bits/stdc++.h> //Headerfile which include all other headerfiles in c++
 
 
-void process_file(char *file_name, int percentile) {
+solution_result process_file(char *file_name, int percentile) {
     // TODO move to single_threaded_solution
     auto buckets = create_buckets(file_name);
 
@@ -36,26 +36,34 @@ void process_file(char *file_name, int percentile) {
                 percentile_pos_in_subbucket_and_subbucket_index.second
         );
 
-        std::wcout << result_sub.first << " " << result_sub.second.first << " " << result_sub.second.second
-                   << std::endl;
+        return result_sub;
     } else {
         auto result = find_percentile_value(
                 percentile_pos_in_bucket_and_bucket_index.second,
                 percentile_pos_in_bucket_and_bucket_index.first, file_name
         );
-        std::wcout << std::hexfloat << result.first << " " << result.second.first << " " << result.second.second << std::endl;
+
+        return result;
     }
 }
 
 
 int main(int argc, char *argv[]) {
     // TODO arg parsing
-
-    //process_file(argv[1], 50);
     int percentile = atoi(argv[2]);
 
-    process_file(argv[1], percentile);
-    //process_file_smp(argv[1], percentile);
+    solution_result result;
+    auto mode = std::string(argv[3]);
+    if (mode == "smp") {
+        result = process_file_smp(argv[1], percentile);
+    } else if (mode == "serial") {
+        result = process_file(argv[1], percentile);
+    } else {
+        std::wcout << "Invalid mode supplied." << std::endl;
+        return -1;
+    }
+
+    print_solution_result(result);
 
     return 0;
 }
