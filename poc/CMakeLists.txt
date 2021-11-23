@@ -19,8 +19,7 @@ add_executable(poc
         bucketing_constants.h
         )
 
-target_link_libraries(poc "-ltbb")
-
 add_executable(verifier verifier.cpp)
 
-add_executable(test test.cpp bucketing.h BufferedReader.h BufferedReader.cpp)
+target_link_libraries(poc "-ltbb")
+
