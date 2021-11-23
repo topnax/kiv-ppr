@@ -166,7 +166,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
                                auto data = inp.first;
 
                                // TODO check whether conversion to number of read numbers is required
-                               auto index = inp.second / NUMBER_SIZE_BYTES;
+                               auto index = inp.second;
 
                                // determine how many numbers have been read
                                auto numbers_read = data.size() / NUMBER_SIZE_BYTES;
@@ -217,7 +217,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
                                            }
                                        }
                                    }
-                                   index++;
+                                   index += NUMBER_SIZE_BYTES;
                                }
                            });
 
@@ -260,5 +260,5 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     }
 
     // return the result
-    return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
+    return std::pair(result_key, std::pair(result_item->lowest_index, result_item->highest_index));
 }
