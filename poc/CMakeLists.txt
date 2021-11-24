@@ -18,9 +18,12 @@ add_executable(poc
         serial_solution.h
         serial_solution.cpp
         solution.h
-        solution.cpp)
+        solution.cpp
+        opencl/opencl_sources.h
+        opencl_solution.h
+        opencl_solution.cpp)
 
 add_executable(verifier verifier.cpp)
 
-target_link_libraries(poc "-ltbb")
+target_link_libraries(poc "-ltbb -lOpenCL")
 

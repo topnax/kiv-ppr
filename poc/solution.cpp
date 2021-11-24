@@ -6,6 +6,7 @@
 #include "solution.h"
 #include "serial_solution.h"
 #include "smp_solution.h"
+#include "opencl_solution.h"
 
 solution_result process_for_solution(char *file_name, int percentile, solution_mode mode) {
     if (mode == SERIAL) {
@@ -13,8 +14,7 @@ solution_result process_for_solution(char *file_name, int percentile, solution_m
     } else if (mode == SMP) {
         return process_file_smp(file_name, percentile);
     } else if (mode == OPENCL) {
-        std::wcout << "NOT IMPLEMENTED YET!" << std::endl;
-        exit(-1);
+        return process_file_opencl(file_name, percentile);
     } else {
         std::wcout << "SOLUTION MODE NOT SUPPORTED!" << std::endl;
         exit(-1);

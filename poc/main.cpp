@@ -22,6 +22,8 @@ int main(int argc, char *argv[]) {
         mode = SERIAL;
     } else if (mode_raw == "smp") {
         mode = SMP;
+    } else if (mode_raw == "opencl") {
+        mode = OPENCL;
     }
 
     result = process_for_solution(argv[1], percentile, mode);
