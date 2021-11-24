@@ -12,6 +12,7 @@
 #include <iostream>
 #include <ostream>
 
+#include "bucketing_constants.h"
 #include "opencl_solution.h"
 #include "opencl/opencl_sources.h"
 
@@ -33,18 +34,28 @@ cl::Device cl_get_gpu_device() {
     return cl::Device();
 }
 
-solution_result process_file_opencl(char *file_name, int percentile) {
-    cl_int error;
-    auto dev = cl_get_gpu_device();
-    cl::Context context(dev);
-    cl::Program program(context, hello_world_code);
+cl::Kernel get_kernel_for_program(std::string program_content, std::string program_name, cl::Context context, cl::Device dev) {
+    cl::Program program(context, program_content);
 
-    error = program.build("-cl-std=CL2.0");
+    auto error = program.build("-cl-std=CL2.0");
     if (error != CL_BUILD_SUCCESS) {
         std::string buildlog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(dev);
         printf("buildlog: %s\n", buildlog.c_str());
         throw std::runtime_error("Error occurred while building the OpenCL program: " + std::to_string(error));
     }
+
+    cl::Kernel kernel(program, program_name.c_str(), &error);
+
+
+
+    return kernel;
+}
+
+solution_result process_file_opencl(char *file_name, int percentile) {
+    cl_int error;
+    auto dev = cl_get_gpu_device();
+    cl::Context context(dev);
+
 
     uint64_t data[10];
     for (int i = 0; i < 10; i++) {
@@ -66,11 +77,13 @@ solution_result process_file_opencl(char *file_name, int percentile) {
         std::wcout << "non 2success: " << error << std::endl;
     }
 
-
-    cl::Kernel kernel(program, "run", &error);
+    cl::Kernel kernel = get_kernel_for_program(hello_world_code, "run", context, dev);
+    //cl::Kernel kernel(program, "run", &error);
     std::wcout << "kernel hwp: " << error << std::endl;
     kernel.setArg(0, cl_buf_buffer_vals);
     kernel.setArg(1, cl_buf_buffer_outs);
+    // kernel.setArg(2, NUMBER_SHIFT);
+    kernel.setArg(2, NUMBER_SHIFT);
 
     cl::CommandQueue queue(context, dev);
     error = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(10), 8);
