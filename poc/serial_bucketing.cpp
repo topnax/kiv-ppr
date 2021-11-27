@@ -3,6 +3,7 @@
 //
 
 #include "serial_bucketing.h"
+#include "bucketing_utils.h"
 #include "bucketing_constants.h"
 #include "double_utils.h"
 
@@ -12,6 +13,7 @@
 #include <algorithm>
 #include <map>
 #include <bitset>
+#include <memory>
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name) {
@@ -115,7 +117,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_
 
 std::pair<double, std::pair<uint64_t, uint64_t>>
 find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name) {
-    std::map<double, bucket_item *> numbers_in_bucket;
+    std::map<double, std::unique_ptr<bucket_item>> numbers_in_bucket;
 
     // open file stream
     std::ifstream fin(file_name, std::ifstream::binary);
@@ -142,24 +144,7 @@ find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bu
                 uint64_t bucket_index = content >> NUMBER_SHIFT;
 
                 if (bucket_index == bucket) {
-                    auto number = *((double *) &content);
-                    auto pos = numbers_in_bucket.find(number);
-                    if (pos == numbers_in_bucket.end()) {
-                        bucket_item *item = new bucket_item; // TODO delete
-                        item->count = 1;
-                        item->lowest_index = index;
-                        item->highest_index = index;
-                        numbers_in_bucket[number] = item;
-                    } else {
-                        auto item = pos->second;
-                        item->count = item->count + 1;
-                        if (item->lowest_index > index) {
-                            item->lowest_index = index;
-                        }
-                        if (item->highest_index < index) {
-                            item->highest_index = index;
-                        }
-                    }
+                    update_histogram_item(content, numbers_in_bucket, index);
                 }
             }
             index++;
@@ -172,7 +157,7 @@ find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bu
 std::pair<double, std::pair<uint64_t, uint64_t>>
 find_percentile_value_subbucket_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name,
                                 uint64_t subbucket) {
-    std::map<double, bucket_item *> numbers_in_bucket;
+    std::map<double, std::unique_ptr<bucket_item>> numbers_in_bucket;
 
     // open file stream
     std::ifstream fin(file_name, std::ifstream::binary);
@@ -202,24 +187,7 @@ find_percentile_value_subbucket_serial(uint64_t bucket, uint64_t percentile_posi
                     uint64_t sub_bucket_index = (content & SUB_BUCKET_MANTISSA_MASK) >> SUB_BUCKET_SHIFT;
 
                     if (sub_bucket_index == subbucket) {
-                        auto number = *((double *) &content);
-                        auto pos = numbers_in_bucket.find(number);
-                        if (pos == numbers_in_bucket.end()) {
-                            bucket_item *item = new bucket_item; // TODO delete
-                            item->count = 1;
-                            item->lowest_index = index;
-                            item->highest_index = index;
-                            numbers_in_bucket[number] = item;
-                        } else {
-                            auto item = pos->second;
-                            item->count = item->count + 1;
-                            if (item->lowest_index > index) {
-                                item->lowest_index = index;
-                            }
-                            if (item->highest_index < index) {
-                                item->highest_index = index;
-                            }
-                        }
+                        update_histogram_item(content, numbers_in_bucket, index);
                     }
                 }
             }

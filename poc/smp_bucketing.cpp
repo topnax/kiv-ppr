@@ -118,7 +118,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     std::vector<char> buffer(NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE, 0);
 
     // make an alias for the tbb::concurrent_hash_map map with our types
-    using occurences_map = tbb::concurrent_hash_map<double, bucket_item *>;
+    using occurences_map = tbb::concurrent_hash_map<double, std::unique_ptr<bucket_item>>;
     occurences_map occurences;
 
     // initialize TBB flow graph
@@ -187,17 +187,17 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
 
                                            if (new_inserted) {
                                                // this key has not been inserted before, initialize a new item
-                                               bucket_item *item = new bucket_item; // TODO delete
+                                               auto *item = new bucket_item;
                                                item->count = 1;
                                                item->lowest_index = index;
                                                item->highest_index = index;
 
                                                // write changes to the accessor
-                                               accessor->second = item;
+                                               accessor->second = std::unique_ptr<bucket_item>(item);
                                            } else {
                                                // this key already exists in the map,
                                                // get the item from the accessor
-                                               auto item = accessor->second;
+                                               auto item = accessor->second.get();
 
                                                // increment the item count
                                                item->count = item->count + 1;
@@ -228,7 +228,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     // prepare for summing the occurrences in order to find the percentile value
     uint64_t sum = 0;
     auto result_key = occurences.begin()->first;
-    auto result_item = occurences.begin()->second;
+    auto result_item = occurences.begin()->second.get();
 
     // the occurrences map has to be sorted by key
     std::vector<std::pair<double, bucket_item *>> occurrences_sorted(occurences.size());
@@ -236,8 +236,8 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     // copy the map contents into a vector
     // TODO memory consumption might be improved
     auto i = 0;
-    for (auto v : occurences) {
-        occurrences_sorted[i] = std::pair(v.first, v.second);
+    for (const auto &v : occurences) {
+        occurrences_sorted[i] = std::pair(v.first, v.second.get());
         i++;
     }
 
