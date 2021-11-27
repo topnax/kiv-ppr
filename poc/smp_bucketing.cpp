@@ -12,6 +12,7 @@
 #include "double_utils.h"
 #include "bucketing_constants.h"
 #include "tbb/concurrent_hash_map.h"
+#include "bucketing_utils.h"
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
@@ -107,12 +108,6 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
 
     return std::pair(buckets_vec, total_bucket_item_count);
 }
-
-struct bucket_item {
-    uint64_t count;
-    uint64_t lowest_index;
-    uint64_t highest_index;
-};
 
 std::pair<double, std::pair<uint64_t, uint64_t>>
 find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name) {

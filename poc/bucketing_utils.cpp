@@ -68,3 +68,21 @@ std::pair<uint64_t , uint64_t > find_percentile_position_in_subbucket(uint64_t p
 
     return std::pair(percentile_pos_in_bucket, bucket_index);
 }
+
+std::pair<double, std::pair<uint64_t, uint64_t>>
+find_percentile_in_histogram(uint64_t percentile_position_in_bucket, std::map<double, bucket_item *> &numbers_in_bucket) {
+    auto result_key = numbers_in_bucket.begin()->first;
+    auto result_item = numbers_in_bucket.begin()->second;
+    uint64_t sum = 0;
+
+    for (auto const&[key, val] : numbers_in_bucket) {
+        sum += val->count;
+        if (sum > percentile_position_in_bucket) {
+            result_key = key;
+            result_item = val;
+            break;
+        }
+    }
+
+    return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
+}

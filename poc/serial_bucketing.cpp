@@ -14,12 +14,6 @@
 #include <bitset>
 
 
-struct bucket_item {
-    uint64_t count;
-    uint64_t lowest_index;
-    uint64_t highest_index;
-};
-
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name) {
     std::vector<uint64_t> buckets(BUCKET_COUNT);
     uint64_t buckets_total_items = 0;
@@ -119,7 +113,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_
     return std::pair(sub_buckets, buckets_total_items);
 }
 
-std::pair<double, std::pair<uint64_t, uint64_t >>
+std::pair<double, std::pair<uint64_t, uint64_t>>
 find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name) {
     std::map<double, bucket_item *> numbers_in_bucket;
 
@@ -172,19 +166,7 @@ find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bu
         }
     }
 
-    uint64_t sum = 0;
-    auto result_key = numbers_in_bucket.begin()->first;
-    auto result_item = numbers_in_bucket.begin()->second;
-    for (auto const&[key, val] : numbers_in_bucket) {
-        sum += val->count;
-        if (sum > percentile_position_in_bucket) {
-            result_key = key;
-            result_item = val;
-            break;
-        }
-    }
-
-    return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
+    return find_percentile_in_histogram(percentile_position_in_bucket, numbers_in_bucket);
 }
 
 std::pair<double, std::pair<uint64_t, uint64_t>>
@@ -245,18 +227,5 @@ find_percentile_value_subbucket_serial(uint64_t bucket, uint64_t percentile_posi
         }
     }
 
-    auto result_key = numbers_in_bucket.begin()->first;
-    auto result_item = numbers_in_bucket.begin()->second;
-    uint64_t sum = 0;
-
-    for (auto const&[key, val] : numbers_in_bucket) {
-        sum += val->count;
-        if (sum > percentile_position_in_bucket) {
-            result_key = key;
-            result_item = val;
-            break;
-        }
-    }
-
-    return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
+    return find_percentile_in_histogram(percentile_position_in_bucket, numbers_in_bucket);
 }
