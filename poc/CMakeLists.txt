@@ -21,7 +21,13 @@ add_executable(poc
         solution.cpp
         opencl/opencl_sources.h
         opencl_solution.h
-        opencl_solution.cpp)
+        opencl_bucketing.h
+        opencl_bucketing.cpp
+        opencl_solution.h
+        opencl_solution.cpp
+        opencl_utils.cpp
+        opencl_utils.h
+        )
 
 add_executable(verifier verifier.cpp)
 
