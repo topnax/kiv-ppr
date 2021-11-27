@@ -3,9 +3,7 @@
 //
 
 #include <vector>
-#include <cmath>
 #include <cstdint>
-#include "bucketing_utils.h"
 #include "solution.h"
 #include "opencl_bucketing.h"
 #include "opencl_utils.h"
@@ -16,22 +14,49 @@
 #include "opencl/opencl_sources.h"
 
 
-std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name, cl::Context &context, cl::Device &dev) {
+inline void compute_bucket_indices(std::vector<char> &data, uint64_t data_size, std::vector<uint64_t> &out, cl::Context &context, cl::Device &dev, cl::Kernel &kernel) {
     cl_int error;
+    // prepare the input buffer
+    cl::Buffer cl_buf_buffer_vals(context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
+                                  data_size, data.data(), &error);
 
+    // TODO might be directly write into the input buffer to save some memory space?
+    // prepare the out buffer
+    cl::Buffer cl_buf_buffer_outs(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, data_size, nullptr, &error);
+
+    // set kernel arguments
+    kernel.setArg(0, cl_buf_buffer_vals);
+    kernel.setArg(1, cl_buf_buffer_outs);
+    kernel.setArg(2, NUMBER_SHIFT);
+    kernel.setArg(3, NUMBER_MAX);
+
+    // TODO might be able to reuse the queue?
+    // prepare the command queue
+    cl::CommandQueue queue(context, dev);
+
+    error = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(data_size / NUMBER_SIZE_BYTES), 8);
+    error = queue.enqueueReadBuffer(cl_buf_buffer_outs, CL_TRUE, 0, data_size, out.data());
+    queue.finish();
+
+    if (error != CL_SUCCESS) {
+        std::wcout << "OpenCL computation failed" << error << std::endl;
+        exit(-1);
+    }
+}
+
+std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name, cl::Context &context, cl::Device &dev) {
     std::vector<uint64_t> buckets(BUCKET_COUNT);
     uint64_t buckets_total_items = 0;
 
     // open file stream
     std::ifstream fin(file_name, std::ifstream::in | std::ifstream::binary);
 
-    auto buffer_size = NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE_OPENCL;
     // prepare a buffer based on the NUMBER_SIZE_BYTES and NUMBER_BUFFER_SIZE constants
+    auto buffer_size = NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE_OPENCL;
     std::vector<char> buffer(buffer_size, 0);
-    auto out_buffer = new uint64_t[NUMBER_BUFFER_SIZE_OPENCL];
-    std::unique_ptr<uint64_t[]> out_buffer_ptr(out_buffer);
+    std::vector<uint64_t> out_buffer(NUMBER_BUFFER_SIZE_OPENCL);
 
-    cl::Kernel kernel = get_kernel_for_program(opencl_create_buckets_source, "run", context, dev);
+    cl::Kernel kernel = get_kernel_for_program(compute_buckets_indices_program, "run", context, dev);
 
     while (true) {
         // read from the file stream
@@ -42,40 +67,8 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
         // calculate how many float numbers were read
         auto numbers_read = fin.gcount() / NUMBER_SIZE_BYTES;
 
-        cl::Buffer cl_buf_buffer_vals(context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
-                                      (size_t)fin.gcount(), buffer.data(), &error);
-        if (error != CL_SUCCESS) {
-            std::wcout << "non 1success: " << error << std::endl;
-        }
-        cl::Buffer cl_buf_buffer_outs(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, numbers_read * NUMBER_SIZE_BYTES, nullptr, &error);
-        if (error != CL_SUCCESS) {
-            std::wcout << "non 2success: " << error << std::endl;
-        }
-
-
-        //cl::Kernel kernel(program, "run", &error);
-        //std::wcout << "kernel hwp: " << error << std::endl;
-        kernel.setArg(0, cl_buf_buffer_vals);
-        kernel.setArg(1, cl_buf_buffer_outs);
-        // kernel.setArg(2, NUMBER_SHIFT);
-        kernel.setArg(2, NUMBER_SHIFT);
-        kernel.setArg(3, NUMBER_MAX);
-
-        cl::CommandQueue queue(context, dev);
-        error = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(numbers_read), 8);
-        if (error != CL_SUCCESS) {
-            std::wcout << "non 2success: " << error << std::endl;
-        }
-
-        error = queue.enqueueReadBuffer(cl_buf_buffer_outs, CL_TRUE, 0, numbers_read * NUMBER_SIZE_BYTES, out_buffer);
-
-        if (error != CL_SUCCESS) {
-            std::wcout << "non 5success: " << error << std::endl;
-        }
-        queue.finish();
-        if (error != CL_SUCCESS) {
-            std::wcout << "non 6success: " << error << std::endl;
-        }
+        // compute bucket indices on the OpenCL device
+        compute_bucket_indices(buffer, fin.gcount(), out_buffer, context, dev, kernel);
 
         for (int i = 0; i < numbers_read; i++) {
             if (out_buffer[i] != NUMBER_MAX) {

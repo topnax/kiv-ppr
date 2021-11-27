@@ -5,7 +5,7 @@
 
 #include <string>
 
-const std::string opencl_create_buckets_source = R"CLC(
+const std::string compute_buckets_indices_program = R"CLC(
 
 #define DOUBLE_FLOAT_EXPONENT_MASK 0x7FF0000000000000
 #define DOUBLE_FLOAT_MANTISSA_MASK 0xFFFFFFFFFFFFF
