@@ -13,6 +13,7 @@
 
 
 solution_result process_file_opencl(char *file_name, int percentile) {
+    // TODO find device by an identifier
     // get OpenCL device
     auto device = cl_get_gpu_device();
     // prepare a context
@@ -21,9 +22,6 @@ solution_result process_file_opencl(char *file_name, int percentile) {
     auto result = create_buckets_opencl(file_name, context, device);
 
     auto perc_pos = find_percentile_position(percentile, result.first, result.second);
-    std::wcout
-            << "first: " << perc_pos.first << std::endl
-            << "second: " << perc_pos.second << std::endl;
 
     auto solution_result = find_percentile_value_opencl(perc_pos.second, perc_pos.first, file_name,  context, device);
 
