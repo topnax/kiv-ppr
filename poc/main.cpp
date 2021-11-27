@@ -2,12 +2,7 @@
 
 #include <iostream>
 #include "bucketing_constants.h"
-#include "bucketing_utils.h"
 #include "solution.h"
-
-// TODO inspect this:
-#include<bits/stdc++.h> //Headerfile which include all other headerfiles in c++
-
 
 
 int main(int argc, char *argv[]) {
