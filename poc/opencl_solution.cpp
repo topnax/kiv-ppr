@@ -6,7 +6,6 @@
 
 
 #include <iostream>
-#include "bucketing_constants.h"
 #include "opencl_solution.h"
 #include "opencl_utils.h"
 #include "opencl_bucketing.h"
@@ -26,5 +25,7 @@ solution_result process_file_opencl(char *file_name, int percentile) {
             << "first: " << perc_pos.first << std::endl
             << "second: " << perc_pos.second << std::endl;
 
-    return solution_result(1, std::pair(1, 1));
+    auto solution_result = find_percentile_value_opencl(perc_pos.second, perc_pos.first, file_name,  context, device);
+
+    return solution_result;
 }

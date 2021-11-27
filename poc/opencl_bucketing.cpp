@@ -81,3 +81,62 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
     return std::pair(buckets, buckets_total_items);
 }
 
+std::pair<double, std::pair<uint64_t, uint64_t>>
+find_percentile_value_opencl(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name, cl::Context &context, cl::Device &dev) {
+    std::map<double, bucket_item *> numbers_in_bucket;
+
+    // open file stream
+    std::ifstream fin(file_name, std::ifstream::binary);
+
+    uint64_t index = 0;
+
+    // prepare a buffer based on the NUMBER_SIZE_BYTES and NUMBER_BUFFER_SIZE constants
+    auto buffer_size = NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE_OPENCL;
+    std::vector<char> buffer(buffer_size, 0);
+    std::vector<uint64_t> out_buffer(NUMBER_BUFFER_SIZE_OPENCL);
+
+    cl::Kernel kernel = get_kernel_for_program(compute_buckets_indices_program, "run", context, dev);
+
+    while (true) {
+        // read from the file stream
+        fin.read(buffer.data(), buffer.size());
+
+        if (fin.gcount() < NUMBER_SIZE_BYTES) break;
+
+        // calculate how many float numbers were read
+        auto numbers_read = fin.gcount() / NUMBER_SIZE_BYTES;
+
+        compute_bucket_indices(buffer, fin.gcount(), out_buffer, context, dev, kernel);
+
+        for (int i = 0; i < numbers_read; i++) {
+            auto bucket_index = out_buffer[i];
+
+            if (out_buffer[i] != NUMBER_MAX) {
+                if (bucket_index == bucket) {
+                    auto number = *((double *) &buffer[i * 8]);
+                    auto pos = numbers_in_bucket.find(number);
+                    if (pos == numbers_in_bucket.end()) {
+                        bucket_item *item = new bucket_item; // TODO delete
+                        item->count = 1;
+                        item->lowest_index = index;
+                        item->highest_index = index;
+                        numbers_in_bucket[number] = item;
+                    } else {
+                        auto item = pos->second;
+                        item->count = item->count + 1;
+                        if (item->lowest_index > index) {
+                            item->lowest_index = index;
+                        }
+                        if (item->highest_index < index) {
+                            item->highest_index = index;
+                        }
+                    }
+                }
+            }
+            index++;
+        }
+    }
+
+    return find_percentile_in_histogram(percentile_position_in_bucket, numbers_in_bucket);
+}
+
