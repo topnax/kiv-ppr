@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cmath>
 #include <map>
+#include <memory>
 
 
 struct bucket_item {
@@ -22,4 +23,6 @@ std::pair<uint64_t, uint64_t>
 find_percentile_position_in_subbucket(uint64_t percentile_pos_in_subbucket, std::vector<uint64_t> buckets,
                                       uint64_t base_bucket);
 
-std::pair<double, std::pair<uint64_t, uint64_t>>  find_percentile_in_histogram(uint64_t  percentile_position_in_bucket, std::map<double, bucket_item *> &numbers_in_bucket);
+std::pair<double, std::pair<uint64_t, uint64_t>>  find_percentile_in_histogram(uint64_t  percentile_position_in_bucket, std::map<double, std::unique_ptr<bucket_item>> &numbers_in_bucket);
+
+void update_histogram_item(uint64_t &content, std::map<double, std::unique_ptr<bucket_item>> &numbers_in_bucket, uint64_t index);

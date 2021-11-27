@@ -83,7 +83,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
 
 std::pair<double, std::pair<uint64_t, uint64_t>>
 find_percentile_value_opencl(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name, cl::Context &context, cl::Device &dev) {
-    std::map<double, bucket_item *> numbers_in_bucket;
+    std::map<double, std::unique_ptr<bucket_item>> numbers_in_bucket;
 
     // open file stream
     std::ifstream fin(file_name, std::ifstream::binary);
@@ -113,24 +113,7 @@ find_percentile_value_opencl(uint64_t bucket, uint64_t percentile_position_in_bu
 
             if (out_buffer[i] != NUMBER_MAX) {
                 if (bucket_index == bucket) {
-                    auto number = *((double *) &buffer[i * 8]);
-                    auto pos = numbers_in_bucket.find(number);
-                    if (pos == numbers_in_bucket.end()) {
-                        bucket_item *item = new bucket_item; // TODO delete
-                        item->count = 1;
-                        item->lowest_index = index;
-                        item->highest_index = index;
-                        numbers_in_bucket[number] = item;
-                    } else {
-                        auto item = pos->second;
-                        item->count = item->count + 1;
-                        if (item->lowest_index > index) {
-                            item->lowest_index = index;
-                        }
-                        if (item->highest_index < index) {
-                            item->highest_index = index;
-                        }
-                    }
+                    update_histogram_item(*((uint64_t * )&buffer[i * 8]), numbers_in_bucket, index);
                 }
             }
             index++;
