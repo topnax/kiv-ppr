@@ -12,10 +12,9 @@
 #include "bucketing_utils.h"
 
 
-solution_result process_file_opencl(char *file_name, int percentile) {
-    // TODO find device by an identifier
+solution_result process_file_opencl(char *file_name, int percentile, const std::string &device_name) {
     // get OpenCL device
-    auto device = cl_get_gpu_device();
+    auto device = cl_get_device(device_name);
     // prepare a context
     auto context = cl::Context(device);
 

@@ -11,6 +11,6 @@
 
 #include "CL/cl2.hpp"
 
-cl::Device cl_get_gpu_device();
+cl::Device cl_get_device(const std::string &device_name);
 
 cl::Kernel get_kernel_for_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev);

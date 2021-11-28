@@ -1,23 +1,28 @@
 //
 // Created by topnax on 26.11.21.
 //
+#include <iostream>
 #include "opencl_utils.h"
 
-cl::Device cl_get_gpu_device() {
+cl::Device cl_get_device(const std::string &device_name) {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
-    if (platforms.size() > 0) {
+    if (!platforms.empty()) {
         auto platform = platforms.front();
         std::vector<cl::Device> devices;
-        platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
+        platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
-        if (devices.size() > 0)
-            return devices.front();
+        for (const auto &device: devices)  {
+            std::string name = device.getInfo<CL_DEVICE_NAME>();
+            if (device_name == name) {
+                return device;
+            }
+        }
     }
 
-    throw std::runtime_error("Error occurred while selecting the OpenCL GPU device.");
-    return cl::Device();
+    std::wcout << "Could not find the OpenCL device identified by the name of \"" << device_name.c_str() << "\". Aborting." << std::endl;
+    exit(-1);
 }
 
 cl::Kernel get_kernel_for_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev) {
