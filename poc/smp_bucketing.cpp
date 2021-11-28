@@ -124,9 +124,8 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     // initialize TBB flow graph
     tbb::flow::graph g;
 
-    // TODO refactor into function node
-    // define input_node multifunction_node type (so that one node can produce multiple items)
-    using node_t = tbb::flow::multifunction_node<std::pair<std::vector<char>, uint64_t>, std::tuple<uint64_t>>;
+    // define input type of a function node that will process data from the input node
+    using node_t = tbb::flow::function_node<std::pair<std::vector<char>, uint64_t>, bool>;
 
     // remember the current index while reading the file
     uint64_t index = 0;
@@ -155,12 +154,11 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
 
     // define a prescription for nodes that will process incoming data from the input node
     node_t processing_node(g, tbb::flow::unlimited,
-                           [&bucket, &occurences](node_t::input_type inp, node_t::output_ports_type &p) {
+                           [&bucket, &occurences](node_t::input_type inp) {
                                // TODO refactor into a function
                                // gather the data to be processed
                                auto data = inp.first;
 
-                               // TODO check whether conversion to number of read numbers is required
                                auto index = inp.second;
 
                                // determine how many numbers have been read
@@ -214,6 +212,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
                                    }
                                    index += NUMBER_SIZE_BYTES;
                                }
+                               return true;
                            });
 
     // connect the input node with the processing node(s)
