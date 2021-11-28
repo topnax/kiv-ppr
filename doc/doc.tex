@@ -138,6 +138,33 @@ Testovaný soubor bude velký několik GB, ale paměť bude omezená na 250 MB. 
 
 \section{Analýza}
 
+\subsection{Percentil}
+
+\subsubsection{Vzorec}
+Definic percentilu existuje více, avšak z informací dostupných ze zadání a z přednášek předmětu KIV/PPR lze pozici percentilu definovat pomocí následujícího vzorečku:
+
+\begin{equation}
+    \begin{split}
+    & position = floor((numbers - 1) \cdot (percentile / 100)) \\ 
+    \end{split}
+\end{equation},
+
+kde $numbers$ je počet 64-bitových čísel v plovoucí čárce ve vstupním souboru, $percentile$ hledaný percentil, $floor$ funkce, která převede dané číslo na nejbližší celé menší číslo a $position$ pozice hledaného percentilu, uvažujeme li, že je soubor seřazený.
+
+\subsubsection{Vyhledání v souboru s omezenou operační pamětí}
+Ze zadání plyne, že paměť, kterou bude mít vytvořený program dostupný, bude omezena na 250MB, a tak je třeba algoritmus pro vyhledání percentilu tomuto omezení přizpůsobit.
+Naivní algoritmus pro vyhledání percentilu totiž předpokládá, že se celý soubor se vejde do paměti, kde bude seřazen, aby bylo možné zjistit hodnotu hledaného percentilu.
+
+Jako nejjednodušší řešení toho problému se jeví rozdělení intervalu čísel, které se mohou v souboru nacházet, na podintervaly, a následně vytvořit histogram četností čísel v jednotlivých podintervalech.
+
+Rozdělení intervalu na podintervaly obnáší definici postupu, jak jednotlivá čísla řadit do intervalů a jak vůbec zvolit počet podintervalů. 
+Počet podintervalů lze zvolit tak, aby se histogram vešel do paměti. Jednotlivá čísla pak lze vydělit počtem podintervalů, čímž získáme podinterval, do kterého dané číslo patří.
+
+Předchozí postup se jeví jako validní, avšak lze provést optimalizaci výpočtu podintervalu tak, aby se namísto dělení používal bitový posun.
+Z definice 64-bitových čísel v plovoucí čárce (IEEE 754) lze totiž odvodit, že pro porovnávání dvou takových čísel stačí pouze jejich prvních 12 nejvýznamnějších bitů (znaménko a exponent).
+Při ponechání prvních 12 bitů rozdělujeme interval čísel v plovoucí čárce na $2^{12}$ podintervalů.
+Samotný výpočet podintervalu, do kterého zpracovávané číslo patří, je tedy realizovaný pomocí bitového posunu o 42 bitů doprava.
+
 \section{Závěr}
 
 \end{document}
