@@ -206,6 +206,23 @@ Pokud by se v podintervalu, ve kterém se nachází percentil, nacházelo příl
 Podinterval, ve kterém se nachází percentil, by se dělil na další podintervaly tak, že by se po původních \bucketingparamone~bitech ponechávalo i dalších \bucketingparamtwo~bitů. 
 V každém podintervalu by tak mohlo být maximálně $2^{\bucketingparamthree}$~unikátních čísel.
 
+\subsection{Sériová implementace}
+Sériová implementace, při které probíhá výpočet jen na jednom vlákně, je velmi jednoduchá, a nachází se ve zdrojovém souboru \texttt{serial\_bucketing.cpp}.
+
+%, kde jsou definovány dvě hlavní funkce: \texttt{create\_buckets\_serial} a \texttt{create\_buckets\_serial}.
+
+Funkce \texttt{create\_buckets_serial} sestavuje histogram z čísel nacházejících se ve vstupním souboru.
+Velikost histogramu je daná počtem bitů, které jsou z každého načteného čísla ponechávány.
+
+Po sestavení histogramu se vypočítá podinterval, ve kterém se percentil nachází, a přesná pozice relativní vůči seřazeným číslům nacházejících se v souboru. 
+
+Poté se ve funkci \texttt{find\_percentile\_value\_serial} znovu čte celý vstupní soubor, ale zpracovávají se pouze čísla, která patří do výsledného podintervalu.
+Výskyt každého zpracovávaného čísla je zaznamenáván do dalšího histogramu (již implementován pomocí datové struktury tabulka). 
+Dále se také pro každé číslo zaznamenává jeho první a poslední výskyt v souboru.
+
+Nakonec, po zpracování celého souboru, je z histogramu, dle předtím vypočítané pozice, vybráno konkrétní číslo (včetně jeho výskytů), které je považováno za hledaný percentil.
+
+Díky výpočtu percentilu pomocí bitového posunu a následné aktualizaci histogramu pomocí $O(1)$ operace (zápis dle indexu do \texttt{std::vector}) je sériová implementace velmi rychlá.
 
 \section{Závěr}
 
