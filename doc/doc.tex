@@ -145,9 +145,9 @@ Definic percentilu existuje více, avšak z informací dostupných ze zadání a
 
 \begin{equation}
     \begin{split}
-    & position = floor((numbers - 1) \cdot (percentile / 100)) \\ 
+    & position = floor((numbers - 1) \cdot (percentile / 100)), \\ 
     \end{split}
-\end{equation},
+\end{equation}
 
 kde $numbers$ je počet 64-bitových čísel v plovoucí čárce ve vstupním souboru, $percentile$ hledaný percentil, $floor$ funkce, která převede dané číslo na nejbližší celé menší číslo a $position$ pozice hledaného percentilu, uvažujeme li, že je soubor seřazený.
 
@@ -162,8 +162,22 @@ Počet podintervalů lze zvolit tak, aby se histogram vešel do paměti. Jednotl
 
 Předchozí postup se jeví jako validní, avšak lze provést optimalizaci výpočtu podintervalu tak, aby se namísto dělení používal bitový posun.
 Z definice 64-bitových čísel v plovoucí čárce (IEEE 754) lze totiž odvodit, že pro porovnávání dvou takových čísel stačí pouze jejich prvních 12 nejvýznamnějších bitů (znaménko a exponent).
+
+\begin{figure}[!ht]
+    \centering 
+    \includegraphics[width=1\textwidth]{pdf/double.pdf}
+    \caption{Bitová reprezentace čísla v plovoucí řádce s dvojitou přesností dle IEE 754}
+\end{figure}
+
 Při ponechání prvních 12 bitů rozdělujeme interval čísel v plovoucí čárce na $2^{12}$ podintervalů.
-Samotný výpočet podintervalu, do kterého zpracovávané číslo patří, je tedy realizovaný pomocí bitového posunu o 42 bitů doprava.
+Samotný výpočet podintervalu, do kterého zpracovávané číslo patří, je tedy realizovaný pomocí bitového posunu o 52 bitů doprava.
+
+Dalším důsledkem bitové reprezentace čísel typu \texttt{double} je to, že pokud budeme ponechávat více než prvních 12 bitů (tedy když budeme ponechávat i bity mantisy), porovnávání dvou takových čísel zústane stále stejné.
+Pomocí počtu bitů, které budeme posouvat, lze tedy jednoduše tedy konfigurovat počet podintervalů.
+
+V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mnoho unikátních čísel, a nebylo by možné dále zpracovávat histogram, je možné ponechávat dalších $n$ bitů následujících po bitech, které jsme ponechali při původním sestrojování histogramu, čímž podinterval rozdělíme na další podintervaly.
+
+Rozdělování čísel do podintervalů pomocí bitového posunu poskytuje rychlý a jednoduchý způsob, jak rozdělovat čísla typu \texttt{double} do podintervalů, a tak efektivně sestavovat histogram i pro soubory, které se nevejdou do operační paměti.
 
 \section{Závěr}
 
