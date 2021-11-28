@@ -25,6 +25,10 @@
 
 \newcommand{\img}[1]{(viz obr. \ref{#1})}
 
+\newcommand{\bucketingparamone}{21}
+\newcommand{\bucketingparamtwo}{21}
+\newcommand{\bucketingparamthree}{22}
+
 \definecolor{pblue}{rgb}{0.13,0.13,1}
 \definecolor{pgreen}{rgb}{0,0.5,0}
 \definecolor{pred}{rgb}{0.9,0,0}
@@ -177,7 +181,7 @@ Samotný výpočet podintervalu, do kterého zpracovávané číslo patří, je 
 Dalším důsledkem bitové reprezentace čísel typu \texttt{double} je to, že pokud budeme ponechávat více než prvních 12 bitů (tedy když budeme ponechávat i bity mantisy), porovnávání dvou takových čísel zústane stále stejné.
 Pomocí počtu bitů, které budeme posouvat, lze tedy jednoduše tedy konfigurovat počet podintervalů.
 
-V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mnoho unikátních čísel, a nebylo by možné hodále zpracovávat, je možné ponechávat dalších $n$ bitů následujících po bitech, které jsme ponechali při původním sestrojování histogramu, čímž podinterval rozdělíme na další podintervaly.
+V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mnoho unikátních čísel, a nebylo by možné ho dále zpracovávat, je možné ponechávat dalších $n$ bitů následujících po bitech, které jsme ponechali při původním sestrojování histogramu, čímž podinterval rozdělíme na další podintervaly.
 
 Rozdělování čísel do podintervalů pomocí bitového posunu poskytuje rychlý a jednoduchý způsob, jak rozdělovat čísla typu \texttt{double} do podintervalů, a tak efektivně sestavovat histogram i pro soubory, které se nevejdou do operační paměti.
 
@@ -188,6 +192,12 @@ Důsledkem toho je tedy efektivní paralelizace tohoto výpočtu složitá, jeli
 Jedním ze způsobů, jak provést paralelní vyhledávání percentilu, je takový způsob, kdy jedno vlákno čte ze souboru, a pomocí kruhového bufferu předává načtená data (čísla) dalším vláknům, která je zpracovávají. Výsledky výpočtů pak ukládají pomocí řízeného přístupu do chráněné paměti histogramu tak, aby nedošlo ke konfliktům. 
 Další variantou tohoto způsobu, když zvolíme správnou velikost podintervalů, je způsob, kdy si každé vlákno sestavuje svůj vlastní histogram, a po přečtení celého souboru jsou histogramy vláken zkombinovány do jednoho hlavním vláknem, přičemž tato varianta je náročnější na velikost používaného paměťového prostoru výměnou za teoreticky rychlejší dobu vyhledávání z důvodu nepřítomnosti synchronizace při přístupú do sdílené paměti histogramu.
 
+
+\section{Popis implementace}
+K vyhledávání percentilů v souborech byl zvolen postup popsaný v sekci \ref{bucketing} nakonfigurovaný tak, aby bylo během sestavování histogramu ponecháváno prvních \bucketingparamone~bitů čísla.
+Pokud by se v podintervalu, ve kterém se nachází percentil, nacházelo příliš mnoho unikátních čísel, tak by se znovu spustilo sestavování histogramu, aby se počet unikátních čísel redukoval. 
+Podinterval, ve kterém se nachází percentil, by se dělil na další podintervaly tak, že by se po původních \bucketingparamone~bitech ponechávalo i dalších \bucketingparamtwo~bitů. 
+V každém podintervalu by tak mohlo být maximálně \bucketingparamthree~unikátních čísel.
 
 
 \section{Závěr}
