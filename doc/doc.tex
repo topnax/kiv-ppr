@@ -224,6 +224,10 @@ Nakonec, po zpracování celého souboru, je z histogramu, dle předtím vypoč�
 
 Díky výpočtu percentilu pomocí bitového posunu a následné aktualizaci histogramu pomocí $O(1)$ operace (zápis dle indexu do \texttt{std::vector}) je sériová implementace velmi rychlá.
 
+\subsection{Vícevláknovái implementace}
+Tato implementace, vycházející z algoritmu popsaném v sekci \ref{bucketing}, využívá knihovnu Intel Threading Building Blocks.
+
+
 \section{Závěr}
 
 \end{document}
