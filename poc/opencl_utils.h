@@ -13,4 +13,4 @@
 
 cl::Device cl_get_gpu_device();
 
-cl::Kernel get_kernel_for_program(std::string program_content, std::string program_name, cl::Context context, cl::Device dev);
+cl::Kernel get_kernel_for_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev);
