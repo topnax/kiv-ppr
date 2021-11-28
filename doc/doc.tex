@@ -182,6 +182,11 @@ V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mno
 Rozdělování čísel do podintervalů pomocí bitového posunu poskytuje rychlý a jednoduchý způsob, jak rozdělovat čísla typu \texttt{double} do podintervalů, a tak efektivně sestavovat histogram i pro soubory, které se nevejdou do operační paměti.
 
 \subsection{Paralelizace vyhledání percentilu}
+Jelikož postup pro vyhledání percentilu v souboru uvedený v sekci \ref{bucketing} je velmi jednoduchý a výpočetně nenáročný, tak se zdá, že hlavním faktorem, který bude ovlivňovat dobu vyhledávání, bude rychlost čtení ze souboru (tedy přístup k IO).
+Důsledkem toho je tedy efektivní paralelizace tohoto výpočtu složitá, jelikož čas strávený čekáním na IO je násobně větší než čas strávený sestavováním histogramu a jeho zpracováním za účelem vyhledání percentilu.
+
+Jedním ze způsobů, jak provést paralelní vyhledávání percentilu, je takový způsob, kdy jedno vlákno čte ze souboru, a pomocí kruhového bufferu předává načtená data (čísla) dalším vláknům, která je zpracovávají. Výsledky výpočtů pak ukládají pomocí řízeného přístupu do chráněné paměti histogramu tak, aby nedošlo ke konfliktům. 
+Další variantou tohoto způsobu, když zvolíme správnou velikost podintervalů, je způsob, kdy si každé vlákno sestavuje svůj vlastní histogram, a po přečtení celého souboru jsou histogramy vláken zkombinovány do jednoho hlavním vláknem, přičemž tato varianta je náročnější na velikost používaného paměťového prostoru výměnou za teoreticky rychlejší dobu vyhledávání z důvodu nepřítomnosti synchronizace při přístupú do sdílené paměti histogramu.
 
 
 
