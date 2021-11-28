@@ -5,16 +5,10 @@
 
 #include <utility>
 #include <cstdint>
+#include "params.h"
 
 using solution_result = std::pair<double, std::pair<uint64_t, uint64_t>>;
 
-enum solution_mode {
-    SERIAL,
-    SMP,
-    OPENCL,
-    NONE
-};
-
-solution_result process_for_solution(char *file_name, int percentile, solution_mode mode);
+solution_result process_for_solution(parameters params);
 
 void print_solution_result(solution_result result);

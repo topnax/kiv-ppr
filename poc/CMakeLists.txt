@@ -27,7 +27,8 @@ add_executable(poc
         opencl_solution.cpp
         opencl_utils.cpp
         opencl_utils.h
-        )
+        params.h
+        params.cpp)
 
 add_executable(verifier verifier.cpp)
 

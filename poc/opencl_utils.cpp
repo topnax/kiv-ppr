@@ -4,7 +4,7 @@
 #include <iostream>
 #include "opencl_utils.h"
 
-cl::Device cl_get_device(const std::string &device_name) {
+bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
@@ -16,13 +16,15 @@ cl::Device cl_get_device(const std::string &device_name) {
         for (const auto &device: devices)  {
             std::string name = device.getInfo<CL_DEVICE_NAME>();
             if (device_name == name) {
-                return device;
+                // device found
+                out_device = device;
+                return true;
             }
         }
     }
 
-    std::wcout << "Could not find the OpenCL device identified by the name of \"" << device_name.c_str() << "\". Aborting." << std::endl;
-    exit(-1);
+    // device was not found
+    return false;
 }
 
 cl::Kernel get_kernel_for_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev) {
