@@ -14,7 +14,8 @@ solution_result process_for_solution(char *file_name, int percentile, solution_m
     } else if (mode == SMP) {
         return process_file_smp(file_name, percentile);
     } else if (mode == OPENCL) {
-        return process_file_opencl(file_name, percentile);
+        // TODO opencl device name from program arguments (RX480)
+        return process_file_opencl(file_name, percentile, "Ellesmere");
     } else {
         std::wcout << "SOLUTION MODE NOT SUPPORTED!" << std::endl;
         exit(-1);
