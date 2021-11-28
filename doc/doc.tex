@@ -192,12 +192,19 @@ Důsledkem toho je tedy efektivní paralelizace tohoto výpočtu složitá, jeli
 Jedním ze způsobů, jak provést paralelní vyhledávání percentilu, je takový způsob, kdy jedno vlákno čte ze souboru, a pomocí kruhového bufferu předává načtená data (čísla) dalším vláknům, která je zpracovávají. Výsledky výpočtů pak ukládají pomocí řízeného přístupu do chráněné paměti histogramu tak, aby nedošlo ke konfliktům. 
 Další variantou tohoto způsobu, když zvolíme správnou velikost podintervalů, je způsob, kdy si každé vlákno sestavuje svůj vlastní histogram, a po přečtení celého souboru jsou histogramy vláken zkombinovány do jednoho hlavním vláknem, přičemž tato varianta je náročnější na velikost používaného paměťového prostoru výměnou za teoreticky rychlejší dobu vyhledávání z důvodu nepřítomnosti synchronizace při přístupú do sdílené paměti histogramu.
 
+\begin{figure}[!ht]
+    \centering 
+    \includegraphics[width=1.038125\textwidth]{pdf/cfd.pdf}
+    \caption{Diagram typu control-flow znázorňující zjednodušený postup používaný při vyhledávání percentilu v souboru s omezenou operační pamětí}
+\end{figure}
+
 
 \section{Popis implementace}
+
 K vyhledávání percentilů v souborech byl zvolen postup popsaný v sekci \ref{bucketing} nakonfigurovaný tak, aby bylo během sestavování histogramu ponecháváno prvních \bucketingparamone~bitů čísla.
 Pokud by se v podintervalu, ve kterém se nachází percentil, nacházelo příliš mnoho unikátních čísel, tak by se znovu spustilo sestavování histogramu, aby se počet unikátních čísel redukoval. 
 Podinterval, ve kterém se nachází percentil, by se dělil na další podintervaly tak, že by se po původních \bucketingparamone~bitech ponechávalo i dalších \bucketingparamtwo~bitů. 
-V každém podintervalu by tak mohlo být maximálně \bucketingparamthree~unikátních čísel.
+V každém podintervalu by tak mohlo být maximálně $2^{\bucketingparamthree}$~unikátních čísel.
 
 
 \section{Závěr}
