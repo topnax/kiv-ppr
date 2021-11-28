@@ -151,14 +151,16 @@ Definic percentilu existuje více, avšak z informací dostupných ze zadání a
 
 kde $numbers$ je počet 64-bitových čísel v plovoucí čárce ve vstupním souboru, $percentile$ hledaný percentil, $floor$ funkce, která převede dané číslo na nejbližší celé menší číslo a $position$ pozice hledaného percentilu, uvažujeme li, že je soubor seřazený.
 
-\subsubsection{Vyhledání v souboru s omezenou operační pamětí}
+\subsubsection{Vyhledání v souboru s omezenou operační pamětí}\label{bucketing}
 Ze zadání plyne, že paměť, kterou bude mít vytvořený program dostupný, bude omezena na 250MB, a tak je třeba algoritmus pro vyhledání percentilu tomuto omezení přizpůsobit.
 Naivní algoritmus pro vyhledání percentilu totiž předpokládá, že se celý soubor se vejde do paměti, kde bude seřazen, aby bylo možné zjistit hodnotu hledaného percentilu.
 
-Jako nejjednodušší řešení toho problému se jeví rozdělení intervalu čísel, které se mohou v souboru nacházet, na podintervaly, a následně vytvořit histogram četností čísel v jednotlivých podintervalech.
+Jako nejjednodušší řešení toho problému se jeví rozdělení intervalu čísel, které se mohou v souboru nacházet, na podintervaly, a následně vytvořit histogram četností čísel v jednotlivých podintervalech. 
+Počet položek v podintervalu, ve kterém se percentil nachází, by pak měl být dostatečně malý na to, aby se tyto položky vešly do operační paměti, a byly seřazeny podle hodnoty.
+Vyhledání percentilu v seřazené posloupnosti čísel je pak jednoduché, jelikož známe pozici percentilu.
 
-Rozdělení intervalu na podintervaly obnáší definici postupu, jak jednotlivá čísla řadit do intervalů a jak vůbec zvolit počet podintervalů. 
-Počet podintervalů lze zvolit tak, aby se histogram vešel do paměti. Jednotlivá čísla pak lze vydělit počtem podintervalů, čímž získáme podinterval, do kterého dané číslo patří.
+Rozdělení intervalu na podintervaly obnáší definici postupu, jak jednotlivá čísla řadit do podintervalů a jak vůbec zvolit počet podintervalů. 
+Počet podintervalů lze zvolit tak, aby se histogram vešel do paměti a počet položek v podintervalech nebyl příliš vysoký. Jednotlivá čísla pak lze vydělit počtem podintervalů, čímž získáme podinterval, do kterého dané číslo patří.
 
 Předchozí postup se jeví jako validní, avšak lze provést optimalizaci výpočtu podintervalu tak, aby se namísto dělení používal bitový posun.
 Z definice 64-bitových čísel v plovoucí čárce (IEEE 754) lze totiž odvodit, že pro porovnávání dvou takových čísel stačí pouze jejich prvních 12 nejvýznamnějších bitů (znaménko a exponent).
@@ -175,9 +177,13 @@ Samotný výpočet podintervalu, do kterého zpracovávané číslo patří, je 
 Dalším důsledkem bitové reprezentace čísel typu \texttt{double} je to, že pokud budeme ponechávat více než prvních 12 bitů (tedy když budeme ponechávat i bity mantisy), porovnávání dvou takových čísel zústane stále stejné.
 Pomocí počtu bitů, které budeme posouvat, lze tedy jednoduše tedy konfigurovat počet podintervalů.
 
-V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mnoho unikátních čísel, a nebylo by možné dále zpracovávat histogram, je možné ponechávat dalších $n$ bitů následujících po bitech, které jsme ponechali při původním sestrojování histogramu, čímž podinterval rozdělíme na další podintervaly.
+V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mnoho unikátních čísel, a nebylo by možné hodále zpracovávat, je možné ponechávat dalších $n$ bitů následujících po bitech, které jsme ponechali při původním sestrojování histogramu, čímž podinterval rozdělíme na další podintervaly.
 
 Rozdělování čísel do podintervalů pomocí bitového posunu poskytuje rychlý a jednoduchý způsob, jak rozdělovat čísla typu \texttt{double} do podintervalů, a tak efektivně sestavovat histogram i pro soubory, které se nevejdou do operační paměti.
+
+\subsection{Paralelizace vyhledání percentilu}
+
+
 
 \section{Závěr}
 
