@@ -218,8 +218,11 @@ Velikost histogramu je daná počtem bitů, které jsou z každého načteného 
 Po sestavení histogramu se vypočítá podinterval, ve kterém se percentil nachází, a přesná pozice relativní vůči seřazeným číslům nacházejících se v souboru. 
 
 Poté se ve funkci \texttt{find\_percentile\_value\_serial} znovu čte celý vstupní soubor, ale zpracovávají se pouze čísla, která patří do výsledného podintervalu.
+
 Výskyt každého zpracovávaného čísla je zaznamenáván do dalšího histogramu (již implementován pomocí datové struktury tabulka). 
 Dále se také pro každé číslo zaznamenává jeho první a poslední výskyt v souboru.
+
+Pokud by během druhého čtení souboru bylo načteno příliš mnoho unikátních čísel, a histogram s konkrétními čísly by se nevešel do omezené paměti, přistoupí se k rozdělení podintervalu na další podintervaly tak, jak je to popsáno v sekci \ref{bucketing}.
 
 Nakonec, po zpracování celého souboru, je z histogramu, dle předtím vypočítané pozice, vybráno konkrétní číslo (včetně jeho výskytů), které je považováno za hledaný percentil.
 
@@ -276,7 +279,6 @@ OpenCL zařízení je zde využíváno k hromadnému výpočtu podintervalů, do
 
 Nakonec se v histogramu vyhledá hledaný percentil dle pozice, která byla předtím vypočítána.
 Tento percentil je pak považován za výsledek.
-
 
 \section{Závěr}
 
