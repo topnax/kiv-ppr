@@ -224,8 +224,31 @@ Nakonec, po zpracování celého souboru, je z histogramu, dle předtím vypoč�
 
 Díky výpočtu percentilu pomocí bitového posunu a následné aktualizaci histogramu pomocí $O(1)$ operace (zápis dle indexu do \texttt{std::vector}) je sériová implementace velmi rychlá.
 
-\subsection{Vícevláknovái implementace}
-Tato implementace, vycházející z algoritmu popsaném v sekci \ref{bucketing}, využívá knihovnu Intel Threading Building Blocks.
+\subsection{Vícevláknová implementace}
+Tato implementace využívá konstrukce \texttt{flow\_graph} z knihovny Intel Threading Building Blocks\footnote{\url{https://www.intel.com/content/www/us/en/developer/tools/oneapi/onetbb.html}} k paralelizaci výpočtu histogramu vycházejícího z algoritmu popsaném v sekci \ref{bucketing}.
+
+První uzel grafu je typu \texttt{tbb::input\_node} a čte data ze vstupního souboru, která rovnou předává následujícím uzlům typu \texttt{tbb::function\_node} ke zpracování.
+Každý tento uzel, jakmile obdrží data, je postupně zpracovává, ignoruje čísla, která dle zadání nejsou považována za validní, vypočítává podinterval pro vyfiltrovaná čísla a aktualizuje histogram. \textcolor{red}{\textbf{Aktualizuje svůj histogram nebo sdílený? Jsou nakonec histogramy sloučeny nebo se použije jeden sdílený?}}. 
+
+\begin{figure}[!ht]
+    \centering 
+    \includegraphics[width=1.0\textwidth]{pdf/create-buckets-tbb.pdf}
+    \caption{Diagram popisující definici precedenčního grafu sestavení histogramu pomocí knihovny TBB}
+\end{figure}
+
+Po sestavení úvodního histogramu následuje sériový výpočet podintervalu, ve kterém se nachází hledaný percentil, a přesná pozice relativní vůči seřazeným číslům nacházejících se v souboru.
+
+Nakonec se znovu zahájí paralelní výpočet, velmi podobný výpočtu popsanému v předchozích odstavcích, avšak s tím rozdílem, že se zpracovávají pouze ta čísla ze vstupního souboru, která patří do podintervalu ve kterém se nachází hledaný percentil.
+Ke každému zpracovávanému číslu se vede záznam typu \texttt{bucket\_item}, který obsahuje informaci o hodnotě čísla, počtu výskytů čísla, jeho prvním a posledním výskytu v souboru.
+
+Záznamy typu \texttt{bucket\_item} jsou jednotlivými uzly vkládány do sdílené tabulky, která je implementována pomocí typu \texttt{concurrent\_hash\_map}\footnote{\url{https://docs.oneapi.io/versions/latest/onetbb/tbb_userguide/concurrent_hash_map.html}} z jmenného prostoru knihovny TBB.
+Tato tabulka, speciálně navržená pro využití v paralelních výpočtech, umožňuje bezpečný přístup k jejím hodnotám tak, aby nedošlo k nebezpečnému souběhu, kdy by k jedné hodnotě přistupovalo více vláken najednou.
+Každý dotaz do tabulky dle klíče vrací hodnotu typu \texttt{accessor}, která, dokud není smazána, zabraňuje ostatním vláknům k chráněné hodnotě přistupovat.
+
+Po druhém zpracování souboru, kdy je již sestavený histogram s konkrétními čísly nacházejícími se v souboru, se obdobně, jako v sériovém výpočtu, vyhledá percentil včetně jeho prvního a posledního výskytu, který je považován za výsledek.
+
+
+
 
 
 \section{Závěr}
