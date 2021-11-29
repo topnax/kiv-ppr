@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(poc)
+project(pprsolver)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(poc
+add_executable(pprsolver
         main.cpp
         serial_bucketing.h
         serial_bucketing.cpp
@@ -35,5 +35,5 @@ add_executable(poc
 
 add_executable(verifier verifier.cpp)
 
-target_link_libraries(poc "-ltbb -lOpenCL -lpthread")
+target_link_libraries(pprsolver "-ltbb -lOpenCL -lpthread")
 
