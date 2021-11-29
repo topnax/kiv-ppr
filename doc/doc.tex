@@ -18,6 +18,7 @@
 \usepackage{subcaption}
 \usepackage{amsfonts}
 \usepackage{siunitx}
+\usepackage{tabularx}
 
 
 \definecolor{mauve}{rgb}{0.58,0,0.82}
@@ -185,7 +186,7 @@ V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mno
 
 Rozdělování čísel do podintervalů pomocí bitového posunu poskytuje rychlý a jednoduchý způsob, jak rozdělovat čísla typu \texttt{double} do podintervalů, a tak efektivně sestavovat histogram i pro soubory, které se nevejdou do operační paměti.
 
-\subsection{Paralelizace vyhledání percentilu}
+\subsection{Paralelizace vyhledání percentilu}\label{parallel-bucketing}
 Jelikož postup pro vyhledání percentilu v souboru uvedený v sekci \ref{bucketing} je velmi jednoduchý a výpočetně nenáročný, tak se zdá, že hlavním faktorem, který bude ovlivňovat dobu vyhledávání, bude rychlost čtení ze souboru (tedy přístup k IO).
 Důsledkem toho je tedy efektivní paralelizace tohoto výpočtu složitá, jelikož čas strávený čekáním na IO je násobně větší než čas strávený sestavováním histogramu a jeho zpracováním za účelem vyhledání percentilu.
 
@@ -247,8 +248,34 @@ Každý dotaz do tabulky dle klíče vrací hodnotu typu \texttt{accessor}, kter
 
 Po druhém zpracování souboru, kdy je již sestavený histogram s konkrétními čísly nacházejícími se v souboru, se obdobně, jako v sériovém výpočtu, vyhledá percentil včetně jeho prvního a posledního výskytu, který je považován za výsledek.
 
+\subsection{Implementace výpočtu s využitím OpenCL}
+Jak již bylo zmíněno v sekci \ref{parallel-bucketing}, dosáhnout efektivní paralelizace navrženého výpočtu, která by byla rychlejší než sériové řešení, není jednoduché.
 
+V rámci této semestrální práce však byl implementován postup, který využívá OpenCL k paralelizaci filtrování a výpočtu podintervalu, do kterého zpracovávané číslo patří.
+Hlavní vlákno načítá větší bloky čísel ze souboru, než u ostatních předtím popsaných postupů (za účelem redukce počtu nutného volání OpenCL zařízení), které následně předává OpenCL zařízení, jež pro každé číslo zjistí, jestli se jedná o validní číslo dle zadání, a pomocí bitového posunu spočítá do jakého podintervalu patří. 
 
+\begin{table}[!ht]
+    \begin{center}
+        \begin{tabular}{ | m{6.5em} | m{1.5cm}| m{1.5cm} | m{1.5cm} | m{1.5cm} | } 
+             \hline
+             vstupní čísla & \texttt{double} & \texttt{double} & ... & \texttt{double} \\ 
+
+             \hline
+              po zpracování &  14573 & 14958 & ... & 1209 \\  
+
+             \hline
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:opencl-bucket-computation}Znázornění hromadného výpočtu podintervalů, do kterých zpracovávaná čísla patří.}
+\end{table}
+
+Hlavní vlákno nakonec zpracuje výsledky, vypočte v jakém podintervalu se nachází hledaný percentil a jaká je jeho přesná pozice relativní vůči seřazeným číslům nacházejících se v souboru.
+
+Poté hlavní vlákno začne znovu číst vstupní soubor, a podobně jako u předchozích postupů sestavuje histogram již s konkrétními čísly.
+OpenCL zařízení je zde využíváno k hromadnému výpočtu podintervalů, do kterých zpracovávaná čísla patří.
+
+Nakonec se v histogramu vyhledá hledaný percentil dle pozice, která byla předtím vypočítána.
+Tento percentil je pak považován za výsledek.
 
 
 \section{Závěr}
