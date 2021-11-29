@@ -1,6 +1,7 @@
 //
 // Created by topnax on 10.10.21.
 //
+#pragma comment(lib, "OpenCL.lib")
 
 #include <vector>
 #include <cstdint>

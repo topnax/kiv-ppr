@@ -38,20 +38,21 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
     };
 
     // define an input node that reads from input_node file
-    tbb::flow::input_node<std::vector<char>> input_node(g, [&](std::vector<char> &out) {
+    tbb::flow::input_node<std::vector<char>> input_node(g, [&](tbb::flow_control& fc) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
         // check whether eof has been reached
         if (fin.gcount() < NUMBER_SIZE_BYTES) {
-            return false;
+            fc.stop();
+            return std::vector<char>();
         }
 
         // send the read data to the next nodes
-        out = std::vector<char>(buffer.begin(), buffer.begin() + fin.gcount());
+        return std::vector<char>(buffer.begin(), buffer.begin() + fin.gcount());
 
-        return true;
-    });
+        // return true;
+     });
 
     // define input_node multifunction_node type (so that one node can produce multiple items)
     using node_t = tbb::flow::multifunction_node<std::vector<char>, std::tuple<uint64_t>>;
@@ -133,17 +134,18 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     uint64_t index = 0;
 
     // define an input node that reads from the input file
-    tbb::flow::input_node<node_t::input_type> input_node(g, [&index, &fin, &buffer](node_t::input_type &out) {
+    tbb::flow::input_node<node_t::input_type> input_node(g, [&index, &fin, &buffer](tbb::flow_control& fc) {
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
         // check whether eof has been reached
         if (fin.gcount() < NUMBER_SIZE_BYTES) {
-            return false;
+            fc.stop();
+            return std::pair(std::vector<char>(), index);
         }
 
         // send the read data to the next nodes
-        out = std::pair(
+        auto out = std::pair(
                 std::vector<char>(buffer.begin(), buffer.begin() + fin.gcount()),
                 index
         );
@@ -151,7 +153,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
         // increment the current index in the file
         index += fin.gcount();
 
-        return true;
+        return out;
     });
 
     // define a prescription for nodes that will process incoming data from the input node
