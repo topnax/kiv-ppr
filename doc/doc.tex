@@ -280,7 +280,14 @@ OpenCL zařízení je zde využíváno k hromadnému výpočtu podintervalů, do
 Nakonec se v histogramu vyhledá hledaný percentil dle pozice, která byla předtím vypočítána.
 Tento percentil je pak považován za výsledek.
 
+\subsection{Naivní implementace}
+Za zmínku také stojí naivní implementace, která implementuje triviální algoritmus bez jakýchkoliv omezení na operační paměť, aby bylo možné porovnat, zdali ostatní implementace poskytují správné výsledky.
+
+Tato implementace se nachází v souboru \texttt{naive.cpp}.
+
 \section{Závěr}
+
+\textcolor{red}{\textbf{Checkl whether the program is able to search for the percentile 100.}} 
 
 \end{document}
 
