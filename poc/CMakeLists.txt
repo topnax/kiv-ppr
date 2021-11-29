@@ -28,9 +28,12 @@ add_executable(poc
         opencl_utils.cpp
         opencl_utils.h
         params.h
-        params.cpp)
+        params.cpp
+        watchdog.h
+        watchdog.cpp
+        )
 
 add_executable(verifier verifier.cpp)
 
-target_link_libraries(poc "-ltbb -lOpenCL")
+target_link_libraries(poc "-ltbb -lOpenCL -lpthread")
 

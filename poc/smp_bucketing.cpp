@@ -13,6 +13,7 @@
 #include "bucketing_constants.h"
 #include "tbb/concurrent_hash_map.h"
 #include "bucketing_utils.h"
+#include "watchdog.h"
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
@@ -56,6 +57,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
     using node_t = tbb::flow::multifunction_node<std::vector<char>, std::tuple<uint64_t>>;
 
     node_t processing_node(g, tbb::flow::unlimited, [&priv_h](std::vector<char> data, node_t::output_ports_type &p) {
+        ThreadWatchdog::kick();
         // get buckets_vec local to this thread
         buckets &local_buckets = priv_h.local();
 
@@ -155,6 +157,7 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     // define a prescription for nodes that will process incoming data from the input node
     node_t processing_node(g, tbb::flow::unlimited,
                            [&bucket, &occurences](node_t::input_type inp) {
+                               ThreadWatchdog::kick();
                                // TODO refactor into a function
                                // gather the data to be processed
                                auto data = inp.first;

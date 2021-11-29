@@ -10,10 +10,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 #include <map>
 #include <bitset>
 #include <memory>
+#include "watchdog.h"
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name) {
@@ -27,6 +27,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name
     std::vector<char> buffer(NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE, 0);
 
     while (true) {
+        ThreadWatchdog::kick();
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
@@ -72,6 +73,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_
     std::vector<char> buffer(NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE, 0);
 
     while (true) {
+        ThreadWatchdog::kick();
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
@@ -104,9 +106,6 @@ std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_
 
             uint64_t sub_bucket_index = (content & SUB_BUCKET_MANTISSA_MASK) >> SUB_BUCKET_SHIFT;
 
-            //printf("%ld offset\n", SUB_BUCKET_SHIFT);
-            //std::cout << "c = " << std::bitset<64>(sub_bucket_index)  << std::endl;
-
             sub_buckets[sub_bucket_index]++;
             buckets_total_items++;
         }
@@ -128,6 +127,7 @@ find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bu
     uint64_t index = 0;
 
     while (true) {
+        ThreadWatchdog::kick();
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
@@ -168,6 +168,7 @@ find_percentile_value_subbucket_serial(uint64_t bucket, uint64_t percentile_posi
     uint64_t index = 0;
 
     while (true) {
+        ThreadWatchdog::kick();
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 

@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <cstdint>
-#include "solution.h"
 #include "opencl_bucketing.h"
 #include "opencl_utils.h"
 #include "CL/cl.h"
@@ -12,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include "opencl/opencl_sources.h"
+#include "watchdog.h"
 
 
 inline void compute_bucket_indices(std::vector<char> &data, uint64_t data_size, std::vector<uint64_t> &out, cl::Context &context, cl::Device &dev, cl::Kernel &kernel) {
@@ -20,7 +20,7 @@ inline void compute_bucket_indices(std::vector<char> &data, uint64_t data_size, 
     cl::Buffer cl_buf_buffer_vals(context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
                                   data_size, data.data(), &error);
 
-    // TODO might be directly write into the input buffer to save some memory space?
+    // TODO might be able to directly write into the input buffer to save some memory space?
     // prepare the out buffer
     cl::Buffer cl_buf_buffer_outs(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, data_size, nullptr, &error);
 
@@ -59,6 +59,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
     cl::Kernel kernel = get_kernel_for_program(compute_buckets_indices_program, "run", context, dev);
 
     while (true) {
+        ThreadWatchdog::kick();
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
@@ -98,6 +99,7 @@ find_percentile_value_opencl(uint64_t bucket, uint64_t percentile_position_in_bu
     cl::Kernel kernel = get_kernel_for_program(compute_buckets_indices_program, "run", context, dev);
 
     while (true) {
+        ThreadWatchdog::kick();
         // read from the file stream
         fin.read(buffer.data(), buffer.size());
 
