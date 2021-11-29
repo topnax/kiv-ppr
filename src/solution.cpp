@@ -10,8 +10,6 @@
 #include "params.h"
 
 solution_result process_for_solution(parameters params) {
-    std::wcout << params.percentile << std::endl;
-    std::wcout << params.file_name.data() << std::endl;
     auto file_name = params.file_name.data();
     auto percentile = params.percentile;
     if (params.mode == SERIAL) {
