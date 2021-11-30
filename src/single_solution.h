@@ -12,4 +12,4 @@
  *
  * @return solution result
  */
-solution_result process_file_serial(char *file_name, int percentile);
+solution_result process_file_single(char *file_name, int percentile);

@@ -16,7 +16,7 @@
  *
  * @return array representing the bucket histogram and the number of items present in buckets
  */
-std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name);
+std::pair<std::vector<uint64_t>, uint64_t> create_buckets_single(char *file_name);
 
 /**
  * Create sub buckets based on the file's content for the given bucket
@@ -26,7 +26,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_serial(char *file_name
  *
  * @return array representing the sub bucket histogram and the number of items present in sub buckets
  */
-std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_name, uint64_t base_bucket_index);
+std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_single(char *file_name, uint64_t base_bucket_index);
 
 /**
  * Find percentile value in the given histogram given it is present in the given bucket
@@ -38,7 +38,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_sub_buckets_serial(char *file_
  * @return the percentile value, its first and last occurrence
  */
 std::pair<double, std::pair<uint64_t, uint64_t>>
-find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name);
+find_percentile_value_single(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name);
 
 /**
  * The percentile
@@ -51,4 +51,4 @@ find_percentile_value_serial(uint64_t bucket, uint64_t percentile_position_in_bu
  * @return the percentile value, its first and last occurrence
  */
 solution_result
-find_percentile_value_subbucket_serial(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name, uint64_t subbucket);
+find_percentile_value_subbucket_single(uint64_t bucket, uint64_t percentile_position_in_bucket, char *file_name, uint64_t subbucket);

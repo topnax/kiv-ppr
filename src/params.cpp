@@ -41,7 +41,7 @@ bool parse_params_from_args(int argc, char *argv[], parameters &parameters) {
     // parse the processor
     std::string processor = argv[3];
     if (processor == PROCESSOR_NAME_SINGLE) {
-        parameters.mode = solution_mode::SERIAL;
+        parameters.mode = solution_mode::SINGLE;
     } else if (processor == PROCESSOR_NAME_SMP) {
         parameters.mode = solution_mode::SMP;
     } else {

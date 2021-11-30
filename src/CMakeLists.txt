@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(pprsolver
         main.cpp
-        serial_bucketing.h
-        serial_bucketing.cpp
+        single_bucketing.h
+        single_bucketing.cpp
         smp_solution.cpp
         smp_solution.h
         smp_bucketing.h
@@ -15,8 +15,8 @@ add_executable(pprsolver
         bucketing_utils.cpp
         bucketing_utils.h
         bucketing_constants.h
-        serial_solution.h
-        serial_solution.cpp
+        single_solution.h
+        single_solution.cpp
         solution.h
         solution.cpp
         opencl/opencl_sources.h

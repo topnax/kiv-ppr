@@ -11,7 +11,7 @@ const auto PROCESSOR_NAME_SINGLE = "SINGLE";
 const auto PROCESSOR_NAME_SMP = "SMP";
 
 enum class solution_mode {
-    SERIAL,
+    SINGLE,
     SMP,
     OPENCL
 };
