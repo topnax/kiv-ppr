@@ -30,13 +30,13 @@ const int NUMBER_SHIFT = NUMBER_SIZE_BITS - BUCKET_BITS;
 const int BUCKET_KEY_LENGTH_BITS = NUMBER_SIZE_BITS - NUMBER_SHIFT;
 
 // calculate the number of buckets
-const uint64_t BUCKET_COUNT = BUCKET_KEY_LENGTH_BITS * 2;
+const uint64_t BUCKET_COUNT = static_cast<uint64_t>(pow(2, BUCKET_KEY_LENGTH_BITS));
 
 // number of bits to be taken from mantissa when performing subbucketing
 const uint64_t SUB_BUCKET_MANTISSA_BITS = 20;
 
 // number of sub buckets
-const uint64_t SUB_BUCKET_COUNT = SUB_BUCKET_MANTISSA_BITS * SUB_BUCKET_MANTISSA_BITS;
+const uint64_t SUB_BUCKET_COUNT = static_cast<uint64_t>(pow(2, SUB_BUCKET_MANTISSA_BITS));
 
 // subbucket mantissa bit mask :)
 const uint64_t SUB_BUCKET_MANTISSA_MASK =
