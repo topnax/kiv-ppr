@@ -111,7 +111,7 @@ find_percentile_value_opencl(uint64_t bucket, uint64_t percentile_position_in_bu
 
         compute_bucket_indices(buffer, fin.gcount(), out_buffer, context, dev, kernel);
 
-        for (int i = 0; i < numbers_read; i++) {
+        for (uint64_t i = 0; i < numbers_read; i++) {
             auto bucket_index = out_buffer[i];
 
             if (out_buffer[i] != NUMBER_MAX) {
