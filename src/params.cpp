@@ -18,7 +18,7 @@ bool parse_params_from_args(int argc, char *argv[], parameters &parameters) {
     bool readable = file.good();
     file.close();
     if (!readable) {
-        std::wcout << "File cannot be read." << std::endl << std::endl;
+        std::wcout << "File " << file_name.c_str() << " cannot be read." << std::endl << std::endl;
         // file cannot be read
         return false;
     }
@@ -64,6 +64,6 @@ void print_help() {
                << "$ " << PROGRAM_NAME << " file_name percentile processor" << std::endl << std::endl
                << "file_name   - name of the file to be processed" << std::endl
                << "percentile  - integer specifying the percentile to be found <1-100>" << std::endl
-               << R"(processor   - "single" (single-threaded processing), "smp" (multi-threaded processing) or name of an OpenCL device to be used for processing)"
+               << "(processor   - \"" << PROCESSOR_NAME_SINGLE << "\" (single-threaded processing), \"" << PROCESSOR_NAME_SMP << "\" (multi-threaded processing) or name of an OpenCL device to be used for processing)"
                << std::endl;
 }

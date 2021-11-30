@@ -6,9 +6,9 @@
 #include <memory>
 #include "opencl_utils.h"
 
-const auto PROGRAM_NAME = "poc";
-const auto PROCESSOR_NAME_SINGLE = "single";
-const auto PROCESSOR_NAME_SMP = "smp";
+const auto PROGRAM_NAME = "pprsolver";
+const auto PROCESSOR_NAME_SINGLE = "SINGLE";
+const auto PROCESSOR_NAME_SMP = "SMP";
 
 enum class solution_mode {
     SERIAL,
