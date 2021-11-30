@@ -12,11 +12,11 @@
 solution_result process_for_solution(parameters params) {
     auto file_name = params.file_name.data();
     auto percentile = params.percentile;
-    if (params.mode == SERIAL) {
+    if (params.mode == solution_mode::SERIAL) {
         return process_file_serial(file_name, percentile);
-    } else if (params.mode == SMP) {
+    } else if (params.mode == solution_mode::SMP) {
         return process_file_smp(file_name, percentile);
-    } else if (params.mode == OPENCL) {
+    } else if (params.mode == solution_mode::OPENCL) {
         return process_file_opencl(file_name, percentile, params.device);
     } else {
         std::wcout << "SOLUTION MODE NOT SUPPORTED!" << std::endl;
