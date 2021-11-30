@@ -9,7 +9,8 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #define CL_LOG_ERRORS stdout
 
-#include "CL/cl2.hpp"
+// local include instead of the global one (so that the teacher can run it without installing additional header files)
+#include "opencl.hpp"
 
 bool cl_get_device(const std::string &device_name, cl::Device &out_device);
 
