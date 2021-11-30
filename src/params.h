@@ -23,6 +23,17 @@ struct parameters {
     cl::Device device;
 };
 
+/**
+ * Make an attempt to parse program parameters from arguments
+ *
+ * @param argc argc
+ * @param argv argv
+ * @param parameters parameters reference to be filled
+ * @return boolean flag indicating whether the parameters have been successfully parsed
+ */
 bool parse_params_from_args(int argc, char *argv[], parameters &parameters);
 
+/**
+ * Print the program help message
+ */
 void print_help();
