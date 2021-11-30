@@ -70,7 +70,8 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
     return result;
 }
 
-int main(int argc, char *argv[]) {
+// rename to main, produces conflicts othervise when compile in Microsoft Visual Studio
+int main_naive(int argc, char *argv[]) {
     int floats_per_read = atoi(argv[2]);
     auto doubles = load_doubles(argv[1], floats_per_read);
     auto filtered_doubles = std::vector<double>();
