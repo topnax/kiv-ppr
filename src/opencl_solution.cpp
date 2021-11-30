@@ -18,7 +18,8 @@ solution_result process_file_opencl(char *file_name, int percentile, cl::Device 
     // find position of the percentile in the bucket
     auto perc_pos = find_percentile_position(percentile, result.first, result.second);
 
-    // find the percentile value in the bucket that was found
+    // find the percentile value using the serial function in the bucket that was found,
+    // as this part cannot be effectively run on the OpenCL device
     auto solution_result = find_percentile_value_serial(perc_pos.second, perc_pos.first, file_name);
 
     return solution_result;
