@@ -290,6 +290,22 @@ Za zmínku také stojí naivní implementace, která implementuje triviální al
 
 Tato implementace se nachází v souboru \texttt{naive.cpp}.
 
+\section{Měření výkonnosti vytvořného programu}
+
+\subsection{Konfigurace testovacího prostředí}
+Všechny testy byly prováděny na počítači s následujícím HW:
+
+\begin{itemize}
+    \item \textbf{CPU} -- AMD Ryzen 5 1600 @ 3.2GHz, 6C / 12T, 16MB L3 cache, 14nm 
+    \item \textbf{RAM} -- Crucial Ballistix Sport LT, 16GB (2x8GB) DDR4 2400 CL16
+    \item \textbf{GPU} -- AMD RX480 @ 1208MHz, 4GB GDDR5 VRAM @ 7000 MHz
+    \item \textbf{úložiště} -- Samsung 970 EVO 1TB, PCIe 3.0 4x NVMe, TLC, 3400 MB/s read, write 2500 MB/s
+\end{itemize}
+
+Pro překlad zdrojových kódů byly použity překladače \texttt{g++} a \texttt{gcc} ve verzi 9.3.0 na operačním systému Ubuntu 20.04.3 LTS (Linux 5.4.0).
+
+% Všechny testy byly pováděny na souboru \texttt{ubuntu-21.04-desktop-amd64.iso} (sha1: \texttt{34409f0432bd67fc12ad7b4aed6348da77b292fb}).
+
 \section{Závěr}
 
 \textcolor{red}{\textbf{Checkl whether the program is able to search for the percentile 100.}} 
