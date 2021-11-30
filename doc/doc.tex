@@ -191,7 +191,7 @@ Jelikož postup pro vyhledání percentilu v souboru uvedený v sekci \ref{bucke
 Důsledkem toho je tedy efektivní paralelizace tohoto výpočtu složitá, jelikož čas strávený čekáním na IO je násobně větší než čas strávený sestavováním histogramu a jeho zpracováním za účelem vyhledání percentilu.
 
 Jedním ze způsobů, jak provést paralelní vyhledávání percentilu, je takový způsob, kdy jedno vlákno čte ze souboru, a pomocí kruhového bufferu předává načtená data (čísla) dalším vláknům, která je zpracovávají. Výsledky výpočtů pak ukládají pomocí řízeného přístupu do chráněné paměti histogramu tak, aby nedošlo ke konfliktům. 
-Další variantou tohoto způsobu, když zvolíme správnou velikost podintervalů, je způsob, kdy si každé vlákno sestavuje svůj vlastní histogram, a po přečtení celého souboru jsou histogramy vláken zkombinovány do jednoho hlavním vláknem, přičemž tato varianta je náročnější na velikost používaného paměťového prostoru výměnou za teoreticky rychlejší dobu vyhledávání z důvodu nepřítomnosti synchronizace při přístupú do sdílené paměti histogramu.
+Další variantou tohoto způsobu, když zvolíme správnou velikost podintervalů, je způsob, kdy si každé vlákno sestavuje svůj vlastní histogram, a po přečtení celého souboru jsou histogramy vláken zkombinovány do jednoho hlavním vláknem, přičemž tato varianta je náročnější na velikost používaného paměťového prostoru výměnou za teoreticky rychlejší dobu vyhledávání z důvodu nepřítomnosti synchronizace při přístupů do sdílené paměti histogramu.
 
 \begin{figure}[!ht]
     \centering 
@@ -212,7 +212,7 @@ Sériová implementace, při které probíhá výpočet jen na jednom vlákně, 
 
 %, kde jsou definovány dvě hlavní funkce: \texttt{create\_buckets\_serial} a \texttt{create\_buckets\_serial}.
 
-Funkce \texttt{create\_buckets_serial} sestavuje histogram z čísel nacházejících se ve vstupním souboru.
+Funkce \texttt{create\_buckets\_serial} sestavuje histogram z čísel nacházejících se ve vstupním souboru.
 Velikost histogramu je daná počtem bitů, které jsou z každého načteného čísla ponechávány.
 
 Po sestavení histogramu se vypočítá podinterval, ve kterém se percentil nachází, a přesná pozice relativní vůči seřazeným číslům nacházejících se v souboru. 
@@ -232,7 +232,10 @@ Díky výpočtu percentilu pomocí bitového posunu a následné aktualizaci his
 Tato implementace využívá konstrukce \texttt{flow\_graph} z knihovny Intel Threading Building Blocks\footnote{\url{https://www.intel.com/content/www/us/en/developer/tools/oneapi/onetbb.html}} k paralelizaci výpočtu histogramu vycházejícího z algoritmu popsaném v sekci \ref{bucketing}.
 
 První uzel grafu je typu \texttt{tbb::input\_node} a čte data ze vstupního souboru, která rovnou předává následujícím uzlům typu \texttt{tbb::function\_node} ke zpracování.
-Každý tento uzel, jakmile obdrží data, je postupně zpracovává, ignoruje čísla, která dle zadání nejsou považována za validní, vypočítává podinterval pro vyfiltrovaná čísla a aktualizuje histogram. \textcolor{red}{\textbf{Aktualizuje svůj histogram nebo sdílený? Jsou nakonec histogramy sloučeny nebo se použije jeden sdílený?}}. 
+Každý tento uzel, jakmile obdrží data, je postupně zpracovává, ignoruje čísla, která dle zadání nejsou považována za validní, vypočítává podinterval pro vyfiltrovaná čísla a aktualizuje histogram. 
+
+Každé vlákno, které zpracovává vstupní data, si vede vlastní histogram, aby nebylo třeba chránit přístup ke sdílené paměti.
+Po zpracování celého souboru hlavní vlákno sloučí histogramy jednotlivých vláken do jednoho výsledného.
 
 \begin{figure}[!ht]
     \centering 
