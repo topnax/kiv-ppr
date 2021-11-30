@@ -15,36 +15,6 @@
 #include "watchdog.h"
 
 
-inline void compute_bucket_indices(std::vector<char> &data, uint64_t data_size, std::vector<uint64_t> &out, cl::Context &context, cl::Device &dev, cl::Kernel &kernel) {
-    cl_int error;
-    // prepare the input buffer
-    cl::Buffer cl_buf_buffer_vals(context, CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR,
-                                  data_size, data.data(), &error);
-
-    // TODO might be able to directly write into the input buffer to save some memory space?
-    // prepare the out buffer
-    cl::Buffer cl_buf_buffer_outs(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, data_size, nullptr, &error);
-
-    // set kernel arguments
-    kernel.setArg(0, cl_buf_buffer_vals);
-    kernel.setArg(1, cl_buf_buffer_outs);
-    kernel.setArg(2, NUMBER_SHIFT);
-    kernel.setArg(3, NUMBER_MAX);
-
-    // TODO might be able to reuse the queue?
-    // prepare the command queue
-    cl::CommandQueue queue(context, dev);
-
-    error = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(data_size / NUMBER_SIZE_BYTES), 8);
-    error = queue.enqueueReadBuffer(cl_buf_buffer_outs, CL_TRUE, 0, data_size, out.data());
-    queue.finish();
-
-    if (error != CL_SUCCESS) {
-        std::wcout << "OpenCL computation failed" << error << std::endl;
-        exit(-1);
-    }
-}
-
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name, cl::Context &context, cl::Device &dev) {
     std::vector<uint64_t> buckets(BUCKET_COUNT);
     uint64_t buckets_total_items = 0;
@@ -65,7 +35,6 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
             cl_int      // number of bits to be shifted
     > create_buckets_functor(create_buckets_program, "create_buckets");
 
-    //
     cl_int error;
     // prepare an input buffer to which read data will be passed
     cl::Buffer input_buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
