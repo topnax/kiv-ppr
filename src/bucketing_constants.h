@@ -30,13 +30,13 @@ const int NUMBER_SHIFT = NUMBER_SIZE_BITS - BUCKET_BITS;
 const int BUCKET_KEY_LENGTH_BITS = NUMBER_SIZE_BITS - NUMBER_SHIFT;
 
 // calculate the number of buckets
-const uint64_t BUCKET_COUNT = pow(2, BUCKET_KEY_LENGTH_BITS);
+const uint64_t BUCKET_COUNT = BUCKET_KEY_LENGTH_BITS * 2;
 
 // number of bits to be taken from mantissa when performing subbucketing
 const uint64_t SUB_BUCKET_MANTISSA_BITS = 20;
 
 // number of sub buckets
-const uint64_t SUB_BUCKET_COUNT = pow(2, SUB_BUCKET_MANTISSA_BITS);
+const uint64_t SUB_BUCKET_COUNT = SUB_BUCKET_MANTISSA_BITS * SUB_BUCKET_MANTISSA_BITS;
 
 // subbucket mantissa bit mask :)
 const uint64_t SUB_BUCKET_MANTISSA_MASK =
@@ -47,8 +47,8 @@ const uint64_t SUB_BUCKET_MANTISSA_MASK =
 const uint64_t SUB_BUCKET_SHIFT = NUMBER_SIZE_BITS - (SUB_BUCKET_MANTISSA_BITS + BUCKET_BITS);
 
 
-// CONSTRAINTS:
-const uint64_t MEBI_BYTE = pow(pow(2, 10), 2);
+// CONSTRAINTS
+const uint64_t MEBI_BYTE = static_cast<uint64_t>(pow(static_cast<uint64_t>(pow(2, 10)), 2));
 const uint64_t MEMORY_LIMIT = MEBI_BYTE * 250;
 
-const uint64_t MAX_BUCKET_COUNT = (unsigned long) (((double) MEMORY_LIMIT * 0.8) / NUMBER_SIZE_BYTES);
+const uint64_t MAX_BUCKET_COUNT = static_cast<uint64_t>(((double) MEMORY_LIMIT * 0.8) / NUMBER_SIZE_BYTES);
