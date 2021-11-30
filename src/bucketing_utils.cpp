@@ -45,9 +45,7 @@ std::pair<uint64_t , uint64_t > find_percentile_position_in_subbucket(uint64_t p
 
     uint64_t  item_count = 0;
 
-    // printf("percentile_pos=%lu\n", percentile_position);
-    // printf("buckets_total_items=%lu\n", buckets_total_items);
-    uint64_t bucket_index = buckets.size() - 1;
+    int64_t bucket_index = buckets.size() - 1;
     bool bucket_found = false;
     if (base_bucket >= BUCKET_COUNT / 2) {
         for (bucket_index = buckets.size() - 1; bucket_index >= 0; bucket_index--) {
