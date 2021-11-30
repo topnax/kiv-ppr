@@ -182,7 +182,7 @@ Z definice 64-bitových čísel v plovoucí čárce (IEEE 754) lze totiž odvodi
 Při ponechání prvních 12 bitů rozdělujeme interval čísel v plovoucí čárce na $2^{12}$ podintervalů.
 Samotný výpočet podintervalu, do kterého zpracovávané číslo patří, je tedy realizovaný pomocí bitového posunu o 52 bitů doprava.
 
-Dalším důsledkem bitové reprezentace čísel typu \texttt{double} je to, že pokud budeme ponechávat více než prvních 12 bitů (tedy když budeme ponechávat i bity mantisy), porovnávání dvou takových čísel zústane stále stejné.
+Dalším důsledkem bitové reprezentace čísel typu \texttt{double} je to, že pokud budeme ponechávat více než prvních 12 bitů (tedy když budeme ponechávat i bity mantisy), porovnávání dvou takových čísel zůstane stále stejné.
 Pomocí počtu bitů, které budeme posouvat, lze tedy jednoduše tedy konfigurovat počet podintervalů.
 
 V případě, že by se v nějakém podintervalu i tak vyskytovalo příliš mnoho unikátních čísel, a nebylo by možné ho dále zpracovávat, je možné ponechávat dalších $n$ bitů následujících po bitech, které jsme ponechali při původním sestrojování histogramu, čímž podinterval rozdělíme na další podintervaly.
@@ -199,7 +199,13 @@ Další variantou tohoto způsobu, když zvolíme správnou velikost podinterval
 \begin{figure}[!ht]
     \centering 
     \includegraphics[width=1.038125\textwidth]{pdf/cfd.pdf}
-    \caption{Diagram typu control-flow znázorňující zjednodušený postup používaný při vyhledávání percentilu v souboru s omezenou operační pamětí}
+    \caption{Diagram typu control-flow znázorňující zjednodušený postup používaný při vyhledávání percentilu v souboru s omezenou operační pamětí.}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering 
+    \includegraphics[width=1.038125\textwidth]{pdf/dfd.pdf}
+    \caption{Diagram typu data-flow znázorňující tok dat v algoritmu.}
 \end{figure}
 
 
@@ -437,7 +443,7 @@ Program vyžaduje při použití následující argumenty:
 \begin{enumerate}
     \item cesta k souboru ke zpracování,
     \item hledaný percentil (číslo z rozsahu 1 až 100 včetně),
-    \item a zařízení, které se má použít pro vyhledání percentilu (\texttt{SINGLE} -- jednovláknový výpočet, \texttt{SMP} -- vícevláknový výpočeta nebo název dostupného OpenCL zařízení).
+    \item a zařízení, které se má použít pro vyhledání percentilu (\texttt{SINGLE} -- jednovláknový výpočet, \texttt{SMP} -- vícevláknový výpočet a nebo název dostupného OpenCL zařízení).
 \end{enumerate}
 
 Ukázka spuštění programu pro obraz Ubuntu OS a hledaný percentil 50 při použití jednovláknového výpočtu:
@@ -466,7 +472,7 @@ Dodatečná synchronizace mezi vlákny pak způsobuje, že oproti sériovému v�
 Z výsledků měření lze pozorovat, že sestavování histogramu na OpenCL zařízení je dostatečně efektivní a přináší tak zrychlení oproti sériovému výpočtu.
 Jedním z důvodů viditelného zrychlení je fakt, že data ze vstupního souboru jsou v případě výpočtu pomocí OpenCL zařízení čtena po větších blocích, než u ostatních výpočtů, a tak je dobře využita paralelizace výpočtu pro jednotlivá čísla a redukuje se i počet volání čtení ze souboru.
 
-Pokud bychom chtěli dosáhnout lepších výsledků paralelizace, bylo by třeba se pokusit navrnout jiný algoritmus pro vyhledání percentilu, který by šel lépe paralelizovat.
+Pokud bychom chtěli dosáhnout lepších výsledků paralelizace, bylo by třeba se pokusit navhrnout jiný algoritmus pro vyhledání percentilu, který by šel lépe paralelizovat.
 Osobně si však myslím, že navržený algoritmus, který čerpá hlavně z využití bitového posunu, je dostatečně dobrý.
 
 
