@@ -29,7 +29,7 @@ bool parse_params_from_args(int argc, char *argv[], parameters &parameters) {
     try {
         percentile = std::stoi(argv[2]);
     }
-    catch (const std::exception &e) {}
+    catch (const std::exception &) {}
     parameters.percentile = percentile;
 
     // percentile percentile constraints
@@ -41,11 +41,11 @@ bool parse_params_from_args(int argc, char *argv[], parameters &parameters) {
     // parse the processor
     std::string processor = argv[3];
     if (processor == PROCESSOR_NAME_SINGLE) {
-        parameters.mode = SERIAL;
+        parameters.mode = solution_mode::SERIAL;
     } else if (processor == PROCESSOR_NAME_SMP) {
-        parameters.mode = SMP;
+        parameters.mode = solution_mode::SMP;
     } else {
-        parameters.mode = OPENCL;
+        parameters.mode = solution_mode::OPENCL;
         cl::Device device;
         // find whether device with the given name exists
         bool device_found = cl_get_device(processor, device);
