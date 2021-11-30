@@ -33,7 +33,7 @@ add_executable(pprsolver
         watchdog.cpp
         )
 
-add_executable(verifier verifier.cpp)
+add_executable(naive naive.cpp)
 
 target_link_libraries(pprsolver "-ltbb -lOpenCL -lpthread")
 
