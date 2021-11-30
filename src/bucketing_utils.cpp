@@ -23,7 +23,7 @@ std::pair<uint64_t , uint64_t > find_percentile_position(int percentile, std::ve
         }
     }
 
-    // iterate over positive numbers in ascending numbers
+    // iterate over positive numbers in ascending order
     if (!bucket_found) {
         for (bucket_index = 0; bucket_index < buckets.size() / 2; bucket_index++) {
             item_count += buckets[bucket_index];
@@ -44,9 +44,10 @@ std::pair<uint64_t , uint64_t > find_percentile_position_in_subbucket(uint64_t p
 
     uint64_t  item_count = 0;
 
-    size_t bucket_index = buckets.size() - 1;
-    bool bucket_found = false;
+    size_t bucket_index;
+    // iterate over numbers in the subbucket, the order is based whether the base bucket contains negative or positive numbers
     if (base_bucket >= BUCKET_COUNT / 2) {
+        // bucket contains negative numbers
         for (bucket_index = buckets.size() - 1; ; bucket_index--) {
             item_count += buckets[bucket_index];
             if (percentile_position < item_count || bucket_index <= 0) {
@@ -54,6 +55,7 @@ std::pair<uint64_t , uint64_t > find_percentile_position_in_subbucket(uint64_t p
             }
         }
     } else {
+        // bucket contains positive numbers
         for (bucket_index = 0; bucket_index < buckets.size(); bucket_index++) {
             item_count += buckets[bucket_index];
             if (percentile_position < item_count) {
@@ -73,6 +75,7 @@ find_percentile_in_histogram(uint64_t percentile_position_in_bucket, std::map<do
     auto result_item = numbers_in_bucket.begin()->second.get();
     uint64_t sum = 0;
 
+    // sum over histogram items till we reached the percentile position
     for (auto const&[key, val] : numbers_in_bucket) {
         sum += val->count;
         if (sum > percentile_position_in_bucket) {
@@ -85,10 +88,11 @@ find_percentile_in_histogram(uint64_t percentile_position_in_bucket, std::map<do
     return std::pair(result_key, std::pair(result_item->lowest_index * 8, result_item->highest_index * 8));
 }
 
-// inlining this causes error during compilation
+// inlining this causes error during compilation I cant be able to solve
 void update_histogram_item(uint64_t &content, std::map<double, std::unique_ptr<bucket_item>> &numbers_in_bucket, uint64_t index) {
     auto number = *((double *) &content);
     auto pos = numbers_in_bucket.find(number);
+    // check whether the item item already exists and update or create it
     if (pos == numbers_in_bucket.end()) {
         auto item = new bucket_item;
         item->count = 1;
