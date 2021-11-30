@@ -107,7 +107,7 @@ find_percentile_value_opencl(uint64_t bucket, uint64_t percentile_position_in_bu
         if (fin.gcount() < NUMBER_SIZE_BYTES) break;
 
         // calculate how many float numbers were read
-        auto numbers_read = fin.gcount() / NUMBER_SIZE_BYTES;
+        uint64_t numbers_read = static_cast<uint64_t>(fin.gcount() / NUMBER_SIZE_BYTES);
 
         compute_bucket_indices(buffer, fin.gcount(), out_buffer, context, dev, kernel);
 
