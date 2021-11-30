@@ -8,11 +8,11 @@
 #include "opencl_bucketing.h"
 #include "opencl_utils.h"
 #include "CL/cl.h"
-#include "bucketing_constants.h"
+#include "../bucketing/bucketing_constants.h"
 #include <iostream>
 #include <fstream>
-#include "opencl/opencl_sources.h"
-#include "watchdog.h"
+#include "opencl_sources.h"
+#include "../utils/watchdog.h"
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name, cl::Context &context, cl::Device &dev) {

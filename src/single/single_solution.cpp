@@ -2,9 +2,9 @@
 // Created by topnax on 23.11.21.
 //
 
-#include "solution.h"
+#include "../solution.h"
 #include "single_bucketing.h"
-#include "bucketing_constants.h"
+#include "../bucketing/bucketing_constants.h"
 
 solution_result process_file_single(char *file_name, int percentile) {
     // create buckets

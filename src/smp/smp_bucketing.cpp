@@ -9,11 +9,11 @@
 #include <atomic>
 #include <map>
 #include "smp_bucketing.h"
-#include "double_utils.h"
-#include "bucketing_constants.h"
+#include "../utils/double_utils.h"
+#include "../bucketing/bucketing_constants.h"
 #include "tbb/concurrent_hash_map.h"
-#include "bucketing_utils.h"
-#include "watchdog.h"
+#include "../bucketing/bucketing_utils.h"
+#include "../utils/watchdog.h"
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {

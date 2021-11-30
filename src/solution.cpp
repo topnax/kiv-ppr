@@ -4,9 +4,9 @@
 
 #include <iostream>
 #include "solution.h"
-#include "single_solution.h"
-#include "smp_solution.h"
-#include "opencl_solution.h"
+#include "single/single_solution.h"
+#include "smp/smp_solution.h"
+#include "opencl/opencl_solution.h"
 #include "params.h"
 
 solution_result process_for_solution(parameters params) {

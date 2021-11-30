@@ -1,7 +1,7 @@
 #include <iostream>
 #include "solution.h"
 #include "params.h"
-#include "watchdog.h"
+#include "utils/watchdog.h"
 
 
 int main(int argc, char *argv[]) {

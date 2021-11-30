@@ -2,7 +2,7 @@
 // Created by topnax on 10.10.21.
 //
 
-#include "bucketing_constants.h"
+#include "../bucketing/bucketing_constants.h"
 
 #include <iostream>
 #include <fstream>

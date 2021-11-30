@@ -2,9 +2,9 @@
 // Created by topnax on 20.11.21.
 //
 
-#include "solution.h"
+#include "../solution.h"
 #include "smp_solution.h"
-#include "bucketing_utils.h"
+#include "../bucketing/bucketing_utils.h"
 #include "smp_bucketing.h"
 
 

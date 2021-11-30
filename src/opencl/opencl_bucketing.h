@@ -6,8 +6,8 @@
 #include <vector>
 #include <cmath>
 #include <cstdint>
-#include "bucketing_utils.h"
-#include "solution.h"
+#include "../bucketing/bucketing_utils.h"
+#include "../solution.h"
 #include "opencl_utils.h"
 
 /**

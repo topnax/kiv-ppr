@@ -4,7 +4,7 @@
 #pragma once
 
 #include <memory>
-#include "opencl_utils.h"
+#include "opencl/opencl_utils.h"
 
 const auto PROGRAM_NAME = "pprsolver";
 const auto PROCESSOR_NAME_SINGLE = "SINGLE";

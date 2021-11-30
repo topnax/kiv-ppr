@@ -3,9 +3,9 @@
 //
 
 #include "single_bucketing.h"
-#include "bucketing_utils.h"
-#include "bucketing_constants.h"
-#include "double_utils.h"
+#include "../bucketing/bucketing_utils.h"
+#include "../bucketing/bucketing_constants.h"
+#include "../utils/double_utils.h"
 
 #include <iostream>
 #include <fstream>
@@ -13,7 +13,7 @@
 #include <map>
 #include <bitset>
 #include <memory>
-#include "watchdog.h"
+#include "../utils/watchdog.h"
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_single(char *file_name) {

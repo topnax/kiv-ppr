@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "bucketing_utils.h"
+#include "../bucketing/bucketing_utils.h"
 
 /**
  * Process the file using multiple threads

@@ -5,35 +5,35 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(pprsolver
         main.cpp
-        single_bucketing.h
-        single_bucketing.cpp
-        smp_solution.cpp
-        smp_solution.h
-        smp_bucketing.h
-        smp_bucketing.cpp
-        double_utils.h
-        bucketing_utils.cpp
-        bucketing_utils.h
-        bucketing_constants.h
-        single_solution.h
-        single_solution.cpp
+        single/single_bucketing.h
+        single/single_bucketing.cpp
+        smp/smp_solution.cpp
+        smp/smp_solution.h
+        smp/smp_bucketing.h
+        smp/smp_bucketing.cpp
+        utils/double_utils.h
+        bucketing/bucketing_utils.cpp
+        bucketing/bucketing_utils.h
+        bucketing/bucketing_constants.h
+        single/single_solution.h
+        single/single_solution.cpp
         solution.h
         solution.cpp
         opencl/opencl_sources.h
-        opencl_solution.h
-        opencl_bucketing.h
-        opencl_bucketing.cpp
-        opencl_solution.h
-        opencl_solution.cpp
-        opencl_utils.cpp
-        opencl_utils.h
+        opencl/opencl_solution.h
+        opencl/opencl_bucketing.h
+        opencl/opencl_bucketing.cpp
+        opencl/opencl_solution.h
+        opencl/opencl_solution.cpp
+        opencl/opencl_utils.cpp
+        opencl/opencl_utils.h
         params.h
         params.cpp
-        watchdog.h
-        watchdog.cpp
+        utils/watchdog.h
+        utils/watchdog.cpp
         )
 
-add_executable(naive naive.cpp)
+add_executable(naivepprsolver naive/naive.cpp)
 
 target_link_libraries(pprsolver "-ltbb -lOpenCL -lpthread")
 

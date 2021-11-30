@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "solution.h"
+#include "../solution.h"
 
 /**
  * Process the file using an OpenCL device for a solution

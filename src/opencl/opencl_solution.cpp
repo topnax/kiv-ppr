@@ -4,8 +4,8 @@
 #include "opencl_solution.h"
 #include "opencl_utils.h"
 #include "opencl_bucketing.h"
-#include "single_bucketing.h"
-#include "bucketing_utils.h"
+#include "../single/single_bucketing.h"
+#include "../bucketing/bucketing_utils.h"
 
 
 solution_result process_file_opencl(char *file_name, int percentile, cl::Device &device) {
