@@ -10,7 +10,7 @@ const auto PROGRAM_NAME = "poc";
 const auto PROCESSOR_NAME_SINGLE = "single";
 const auto PROCESSOR_NAME_SMP = "smp";
 
-enum solution_mode {
+enum class solution_mode {
     SERIAL,
     SMP,
     OPENCL
