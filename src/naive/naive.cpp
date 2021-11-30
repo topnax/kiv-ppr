@@ -42,7 +42,7 @@ std::vector<double> load_doubles(char *file_name, int floats_per_read) {
 }
 
 double find_percentile(int percentile, std::vector<double> &doubles) {
-    return doubles[(doubles.size() - 1) * ((double) percentile / (double) 100)];
+    return doubles[static_cast<uint64_t>((doubles.size() - 1) * ((double) percentile / (double) 100))];
 }
 
 std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std::vector<double> &doubles) {
@@ -70,7 +70,7 @@ std::vector<std::pair<long, long>> find_indices(std::vector<double> &values, std
     return result;
 }
 
-// rename to main, produces conflicts othervise when compile in Microsoft Visual Studio
+// rename to main, produces conflicts otherwise when compile in Microsoft Visual Studio
 int main_naive(int argc, char *argv[]) {
     int floats_per_read = atoi(argv[2]);
     auto doubles = load_doubles(argv[1], floats_per_read);
