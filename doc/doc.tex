@@ -317,7 +317,7 @@ Jako nástroj pro měření byl zvolen program \texttt{time} běžně dostupný 
 
 \subsection{Výsledky měření}
 
-V rámci měření byl program spuštěn čtyřikrát pro každé dostupné zařízení na soubor obsahující obraz Ubuntu OS.
+V rámci měření byl program spuštěn čtyřikrát pro každé dostupné zařízení na soubor obsahující obraz Ubuntu OS. Hledaný byl percentil 50.
 Časy běhů jsou zaznamenány v následující tabulce: 
 
 \begin{table}[!ht]
@@ -349,7 +349,7 @@ Z naměřených dat lze spočítat pro oba paralelní výpočty urychlení oprot
 přičemž $T_s$ je čas běhu sériového výpočtu a $T_p$ čas běhu paralelního. 
 Po dosazení naměřených hodnot do vzorce získáváme urychlení $0.771$ pro paralelní výpočet pomocí zařízení SMP, zatímco pro paralelní výpočet pomocí zařízení OpenCL (\textit{Ellesmere}) získáváme urychlení $1.32.$
 
-Časy běhů programů pro soubory různých velikostí obsahující náhodná data jsou zaznamenány v následujícím grafu:
+Časy běhů programů pro percentil 50 a soubory různých velikostí obsahující náhodná data jsou zaznamenány v následujícím grafu:
 \\
 \\
 \begin{figure}[!ht]
@@ -417,6 +417,32 @@ Při získávání průměrných časů běhu programu pro náhodné soubory (ge
         done 
     done
 ) | tee benchmark_result
+\end{lstlisting}
+
+\section{Uživatelská příručka}
+\subsection{Sestavení}
+Program lze sestavit buď pomocí Microsoft Visual Studio IDE po nahrání hlavičkových a zdrojových souborů do řešení nebo pomocí použití nástroje CMake: 
+
+\begin{lstlisting}
+cd src
+cmake .
+cmake --build . --target pprsolver
+\end{lstlisting}
+
+Po použití nástroje CMake vznikne v pracovním adresáři spustitelný program \texttt{pprsolver}.
+
+\subsection{Použití}
+Program vyžaduje při použití následující argumenty:
+
+\begin{enumerate}
+    \item cesta k souboru ke zpracování,
+    \item hledaný percentil (číslo z rozsahu 1 až 100 včetně),
+    \item a zařízení, které se má použít pro vyhledání percentilu (\texttt{SINGLE} -- jednovláknový výpočet, \texttt{SMP} -- vícevláknový výpočeta nebo název dostupného OpenCL zařízení).
+\end{enumerate}
+
+Ukázka spuštění programu pro obraz Ubuntu OS a hledaný percentil 50 při použití jednovláknového výpočtu:
+\begin{lstlisting}
+./pprsolver ubuntu-21.04-desktop-amd64.iso 50 SINGLE
 \end{lstlisting}
 
 \section{Závěr}
