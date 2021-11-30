@@ -29,7 +29,7 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_smp(char *file_name) {
     // initialize input_node new flow graph
     tbb::flow::graph g;
 
-    // TODO might utilize std::vector<atomic<uint64_t>> to reduce memory consumption in exchange for increased CPU time
+    // TODO possible improvement: might utilize std::vector<atomic<uint64_t>> to reduce memory consumption in exchange for increased CPU time
     // prepare input_node factory for each thread's bucket vector
     tbb::combinable<buckets> priv_h{
             []() {
@@ -160,7 +160,6 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     node_t processing_node(g, tbb::flow::unlimited,
                            [&bucket, &occurences](node_t::input_type inp) {
                                ThreadWatchdog::kick();
-                               // TODO refactor into a function
                                // gather the data to be processed
                                auto data = inp.first;
 
@@ -238,7 +237,6 @@ find_percentile_value_smp(uint64_t bucket, uint64_t percentile_position_in_bucke
     std::vector<std::pair<double, bucket_item *>> occurrences_sorted(occurences.size());
 
     // copy the map contents into a vector
-    // TODO memory consumption might be improved
     auto i = 0;
     for (const auto &v : occurences) {
         occurrences_sorted[i] = std::pair(v.first, v.second.get());
