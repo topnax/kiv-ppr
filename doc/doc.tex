@@ -447,7 +447,28 @@ Ukázka spuštění programu pro obraz Ubuntu OS a hledaný percentil 50 při po
 
 \section{Závěr}
 
-\textcolor{red}{\textbf{Checkl whether the program is able to search for the percentile 100.}} 
+V rámci této semestrální práce byl vytvořen program napsaný v jazyce C++ 17, který umožňuje vyhledat percentil v libovolně velkém souboru i v případech, kdy je zpracovávaný soubor násobně větší než operační paměť dostupná programu.
+Před spuštěním programu lze vybrat zdali má být výpočet sériový či paralelní.
+
+Všechny tři implementované výpočty vycházejí z navrženého algoritmu, přičemž došlo jen k minimálním úpravám algoritmu oproti jeho původnímu návrhu.
+
+Paralelní výpočet je implementován pomocí knihovny Intel Threading Building Blocks, a využívá konstrukce \texttt{tbb::flow\_graph}.
+
+Druhý paralelní výpočet je implementován pomocí OpenCL, kdy je na OpenCL zařízení sestavován úvodní histogram.
+
+Jelikož je navržený algoritmus pro vyhledávání percentilu v souboru velmi efektivní, tak jednotlivé paralelizace algoritmu nedosahují žádného nebo jen malého urychlení. 
+Omezujícím faktorem pro urychlení pomocí paralelizace je také to, že velkou část času výpočtu se čeká na IO, kde nám paralelizace příliš nepomůže.
+
+V případě paralelizace pomocí knihovny TBB byl tento výpočet rychlejší než jednovláknový výpočet pouze v případě, když nebyl program sestavován v režimu \texttt{release}.
+Hlavním důvodem, proč je tato paralelizace pomalá, je to, že v jednotlivých vláknech nedochází k náročným výpočtům.
+Dodatečná synchronizace mezi vlákny pak způsobuje, že oproti sériovému výpočtu dojde ke zpomalení.
+
+Z výsledků měření lze pozorovat, že sestavování histogramu na OpenCL zařízení je dostatečně efektivní a přináší tak zrychlení oproti sériovému výpočtu.
+Jedním z důvodů viditelného zrychlení je fakt, že data ze vstupního souboru jsou v případě výpočtu pomocí OpenCL zařízení čtena po větších blocích, než u ostatních výpočtů, a tak je dobře využita paralelizace výpočtu pro jednotlivá čísla a redukuje se i počet volání čtení ze souboru.
+
+Pokud bychom chtěli dosáhnout lepších výsledků paralelizace, bylo by třeba se pokusit navrnout jiný algoritmus pro vyhledání percentilu, který by šel lépe paralelizovat.
+Osobně si však myslím, že navržený algoritmus, který čerpá hlavně z využití bitového posunu, je dostatečně dobrý.
+
 
 \end{document}
 
