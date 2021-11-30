@@ -13,4 +13,4 @@
 
 bool cl_get_device(const std::string &device_name, cl::Device &out_device);
 
-cl::Kernel get_kernel_for_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev);
+cl::Program get_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev);

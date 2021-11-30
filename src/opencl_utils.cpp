@@ -27,19 +27,15 @@ bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
     return false;
 }
 
-cl::Kernel get_kernel_for_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev) {
+cl::Program get_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev) {
     cl::Program program(context, program_content);
 
     auto error = program.build("-cl-std=CL2.0");
     if (error != CL_BUILD_SUCCESS) {
         std::string buildlog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(dev);
-        printf("buildlog: %s\n", buildlog.c_str());
+        printf("Build log: %s\n", buildlog.c_str());
         throw std::runtime_error("Error occurred while building the OpenCL program: " + std::to_string(error));
     }
 
-    cl::Kernel kernel(program, program_name.c_str(), &error);
-
-
-
-    return kernel;
+    return program;
 }
