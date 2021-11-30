@@ -3,9 +3,8 @@
 //
 #pragma once
 
-
-const unsigned long DOUBLE_FLOAT_EXPONENT_MASK = 0x7FF0000000000000;
-const unsigned long DOUBLE_FLOAT_MANTISSA_MASK = 0xFFFFFFFFFFFFF;
+const uint64_t DOUBLE_FLOAT_EXPONENT_MASK = 0x7FF0000000000000u;
+const uint64_t DOUBLE_FLOAT_MANTISSA_MASK = 0xFFFFFFFFFFFFFu;
 
 inline bool is_valid_double(uint64_t num) {
     // filter out SUBNORMAL, INFINITE or NAN numbers
