@@ -20,6 +20,9 @@
 \usepackage{siunitx}
 \usepackage{tabularx}
 
+% Bar chart drawing library 
+\usepackage{pgfplots} 
+\usetikzlibrary{patterns}
 
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 \usetikzlibrary{shapes,positioning,matrix,arrows}
@@ -290,10 +293,10 @@ Za zmínku také stojí naivní implementace, která implementuje triviální al
 
 Tato implementace se nachází v souboru \texttt{naive.cpp}.
 
-\section{Měření výkonnosti vytvořného programu}
+\section{Měření výkonnosti vytvořeného programu}
 
 \subsection{Konfigurace testovacího prostředí}
-Všechny testy byly prováděny na počítači s následujícím HW:
+Všechny testy byly prováděny na počítači s následujícím hardware:
 
 \begin{itemize}
     \item \textbf{CPU} -- AMD Ryzen 5 1600 @ 3.2GHz, 6C / 12T, 16MB L3 cache, 14nm 
@@ -302,9 +305,119 @@ Všechny testy byly prováděny na počítači s následujícím HW:
     \item \textbf{úložiště} -- Samsung 970 EVO 1TB, PCIe 3.0 4x NVMe, TLC, 3400 MB/s read, write 2500 MB/s
 \end{itemize}
 
+Výše zmíněná grafická karta vystupuje je dostupná pro výpočet v OpenCL pod názvem \textit{Ellesmere}.
+
 Pro překlad zdrojových kódů byly použity překladače \texttt{g++} a \texttt{gcc} ve verzi 9.3.0 na operačním systému Ubuntu 20.04.3 LTS (Linux 5.4.0).
 
-% Všechny testy byly pováděny na souboru \texttt{ubuntu-21.04-desktop-amd64.iso} (sha1: \texttt{34409f0432bd67fc12ad7b4aed6348da77b292fb}).
+Překlad byl prováděn v režimu \texttt{release}.  
+
+Některá měření byla prováděna na souboru \texttt{ubuntu-21.04-desktop-amd64.iso} (sha1: \texttt{34409f0432bd67fc12ad7b4aed6348da77b292fb}) o velikosti 2.7GiB. Tento soubor je dostupný na oficiálních stránkách operačního systému Ubuntu.
+
+Jako nástroj pro měření byl zvolen program \texttt{time} běžně dostupný v Ubuntu OS.
+
+\subsection{Výsledky měření}
+
+V rámci měření byl program spuštěn čtyřikrát pro každé dostupné zařízení na soubor obsahující obraz Ubuntu OS.
+Časy běhů jsou zaznamenány v následující tabulce: 
+
+\begin{table}[!ht]
+    \begin{center}
+        \begin{tabular}{ | m{6.5em} || m{1.5cm}| m{1.5cm} | m{1.5cm} | m{1.5cm} || m{1.7cm} |} 
+             \hline
+             Zařízení & 1. & 2. & 3. & 4. & Průměr[s] \\ 
+
+             \hline
+             \hline
+              SINGLE &  4.197 & 4.308 & 4.195 & 4.257 & 4.239 \\  
+              SMP & 5.486 & 5.466 & 5.496 & 5.535 & 5.495 \\
+              Ellesmere & 3.294 & 3.069 & 3.374 & 3.105 & 3.211 \\
+
+             \hline
+        \end{tabular}
+    \end{center}
+    \caption{Časy běhů programu při zpracování souboru s obrazem Ubuntu OS.}
+\end{table}
+
+Z naměřených dat lze spočítat pro oba paralelní výpočty urychlení oproti sériové verzi dle následujícího vzorce:
+
+\begin{equation}
+    \begin{split}
+    S = \frac{T_s}{T_p} \\ 
+    \end{split}
+\end{equation}
+
+přičemž $T_s$ je čas běhu sériového výpočtu a $T_p$ čas běhu paralelního. 
+Po dosazení naměřených hodnot do vzorce získáváme urychlení $0.771$ pro paralelní výpočet pomocí zařízení SMP, zatímco pro paralelní výpočet pomocí zařízení OpenCL (\textit{Ellesmere}) získáváme urychlení $1.32.$
+
+Časy běhů programů pro soubory různých velikostí obsahující náhodná data jsou zaznamenány v následujícím grafu:
+\\
+\\
+\begin{figure}[!ht]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        ybar=.05cm,
+        xlabel={Soubor},
+        ylabel={Průměrný čas [s]},
+    minor y tick num=2,
+        ytick={0,1,2,3,4,5,6,7,8,9,10},
+        bar width = 4pt,
+        legend style={at={(0.45,0.9)},anchor=west},
+        symbolic x coords={100MiB,200MiB,500MiB,1000MiB,2500MiB,5000MiB},
+        xtick=data]
+        \addplot coordinates {
+            (100MiB,0.192)
+            (200MiB,0.371)
+            (500MiB,0.924)
+            (1000MiB,1.894)
+            (2500MiB,4.67)
+            (5000MiB,9.014)
+        };
+
+        \addplot coordinates {
+            (100MiB,0.248)
+            (200MiB,0.458)
+            (500MiB,1.074)
+            (1000MiB,2.122)
+            (2500MiB,5.16)
+            (5000MiB,10.24)
+        };
+
+        \addplot coordinates {
+            (100MiB,0.434)
+            (200MiB,0.544)
+            (500MiB,0.936)
+            (1000MiB,1.614)
+            (2500MiB,3.082)
+            (5000MiB,5.814)
+        };
+
+
+        \legend {SINGLE, SMP, OpenCL};
+
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Graf zobrazující data naměřená při spouštění programu pro soubory o různých velikostech.}
+\end{figure}
+
+\newpage
+Při získávání průměrných časů běhu programu pro náhodné soubory (generovány čtením z \texttt{/dev/urandom}) byl program spuštěn vždy pětkrát pomocí speciálního bash skriptu:
+
+\begin{lstlisting}[language=bash,caption={Bash skript pro spuštění vytvořeného programu pro různé soubory a pro všechna dostupná zařízení.},captionpos=b, label={lst:benchmark-script}]
+(
+    for file in 100MiB 200MiB 500MiB 1000MiB 2500MiB 5000MiB
+    do
+        echo $file:
+        echo "---------------"
+        for device in SINGLE SMP Ellesmere
+        do 
+            echo $device:
+            (/usr/bin/time -v ./pprsolver ../data/$file.bin 50 $device) 2>&1 | grep -E "Maximum resident set size|Elapsed|e) page faults"
+        done 
+    done
+) | tee benchmark_result
+\end{lstlisting}
 
 \section{Závěr}
 
