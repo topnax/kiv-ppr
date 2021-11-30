@@ -6,11 +6,13 @@
 
 #define CL_TARGET_OPENCL_VERSION 200
 #define CL_HPP_TARGET_OPENCL_VERSION 200
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #define CL_LOG_ERRORS stdout
 
-// local include instead of the global one (so that the teacher can run it without installing additional header files)
-#include "opencl.hpp"
+#if __has_include(<CL/opencl.hpp>)
+    #include <CL/opencl.hpp>
+#else
+    #include "opencl.hpp"
+#endif
 
 /**
  * Make an attempt to find an OpenCL device by the given name.
