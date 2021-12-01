@@ -16,7 +16,7 @@
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name, cl::Context &context, cl::Device &dev) {
-    std::vector<uint64_t> buckets(BUCKET_COUNT);
+    std::vector<cl_ulong> buckets(BUCKET_COUNT, 0);
     uint64_t buckets_total_items = 0;
 
     // open file stream
@@ -39,13 +39,13 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
     cl::Buffer input_buffer(context, CL_MEM_READ_WRITE, buffer_size);
 
     // prepare the buckets buffer
-    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, buckets.size() * NUMBER_SIZE_BYTES);
+    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, BUCKET_COUNT * NUMBER_SIZE_BYTES);
 
     // prepare the command queue
     cl::CommandQueue queue(context, dev);
 
     // setup the buckets buffer
-    error = queue.enqueueWriteBuffer(buckets_buffer, CL_TRUE, 0, buckets.size() * NUMBER_SIZE_BYTES, buckets.data());
+    error = queue.enqueueWriteBuffer(buckets_buffer, CL_TRUE, 0, BUCKET_COUNT * NUMBER_SIZE_BYTES, buckets.data());
 
     if (error != CL_SUCCESS) {
         std::wcout << "OpenCL buffer setup failed" << error << std::endl;
@@ -72,10 +72,14 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
         std::wcout << "Done EWB..." << error << std::endl;
 
         // set enqueue args based on the numbers read
-        cl::EnqueueArgs args(queue, cl::NDRange(numbers_read), NUMBER_SIZE_BYTES);
+        cl::EnqueueArgs args(queue, cl::NDRange(numbers_read));
 
         std::wcout << "Calling functor..." << error << std::endl;
-        create_buckets_functor(args, input_buffer, buckets_buffer, NUMBER_SHIFT);
+        create_buckets_functor(args, input_buffer, buckets_buffer, NUMBER_SHIFT, error);
+        if (error != CL_SUCCESS) {
+            std::wcout << "OpenCL failed to execute kernel" << error << std::endl;
+            exit(-1);
+        }
         std::wcout << "Functor called..." << error << std::endl;
     }
 

@@ -30,7 +30,7 @@ __kernel void create_buckets(__global ulong* data, __global ulong* outs, int shi
 
     ulong bucket_index = ((data_item) >> shift) & DOUBLE_FLOAT_MANTISSA_MASK;
     outs[1] = 1;
-    // atom_inc(outs[1]);
+    //atom_inc(&outs[bucket_index]);
 }
 
 )CLC";
