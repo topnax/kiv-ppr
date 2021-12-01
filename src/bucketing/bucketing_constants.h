@@ -9,7 +9,7 @@
 
 // size of the number buffer when reading from a file
 const int NUMBER_BUFFER_SIZE = 1000;
-const int NUMBER_BUFFER_SIZE_OPENCL = 4000000;
+const int NUMBER_BUFFER_SIZE_OPENCL = 1000;
 
 // size of numbers being loaded from a file in bytes
 const int NUMBER_SIZE_BYTES = sizeof(double);

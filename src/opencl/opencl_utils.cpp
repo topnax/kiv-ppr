@@ -30,7 +30,7 @@ bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
 cl::Program get_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev) {
     cl::Program program(context, program_content);
 
-    auto error = program.build("-cl-std=CL2.0");
+    auto error = program.build();
     if (error != CL_BUILD_SUCCESS) {
         std::string buildlog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(dev);
         printf("Build log: %s\n", buildlog.c_str());

@@ -25,7 +25,6 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
     // prepare a buffer based on the NUMBER_SIZE_BYTES and NUMBER_BUFFER_SIZE constants
     auto buffer_size = NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE_OPENCL;
     std::vector<char> buffer(buffer_size, 0);
-    std::vector<uint64_t> out_buffer(NUMBER_BUFFER_SIZE_OPENCL);
 
     cl::Program create_buckets_program = get_program(create_buckets_source, "create_buckets", context, dev);
 
@@ -37,11 +36,10 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
 
     cl_int error;
     // prepare an input buffer to which read data will be passed
-    cl::Buffer input_buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-                            buffer.size(), buffer.data(), &error);
+    cl::Buffer input_buffer(context, CL_MEM_READ_WRITE, buffer_size);
 
     // prepare the buckets buffer
-    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, buckets.size() * NUMBER_SIZE_BYTES, nullptr, &error);
+    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, buckets.size() * NUMBER_SIZE_BYTES);
 
     // prepare the command queue
     cl::CommandQueue queue(context, dev);
@@ -64,21 +62,28 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
         // calculate how many float numbers were read
         auto numbers_read = fin.gcount() / NUMBER_SIZE_BYTES;
 
+        std::wcout << "Calling EWB..." << error << std::endl;
         // write read data to the input buffer
-        error = queue.enqueueWriteBuffer(input_buffer, CL_TRUE, 0, numbers_read * NUMBER_SIZE_BYTES, buffer.data());
+        error = queue.enqueueWriteBuffer(input_buffer, CL_TRUE, 0, buffer_size, buffer.data());
         if (error != CL_SUCCESS) {
             std::wcout << "OpenCL failed to write to the input buffer" << error << std::endl;
             exit(-1);
         }
+        std::wcout << "Done EWB..." << error << std::endl;
 
         // set enqueue args based on the numbers read
         cl::EnqueueArgs args(queue, cl::NDRange(numbers_read), NUMBER_SIZE_BYTES);
 
+        std::wcout << "Calling functor..." << error << std::endl;
         create_buckets_functor(args, input_buffer, buckets_buffer, NUMBER_SHIFT);
+        std::wcout << "Functor called..." << error << std::endl;
     }
 
+    
+    std::wcout << "About to ERB..." << error << std::endl;
     // read the created histogram back to the main memory
     error = queue.enqueueReadBuffer(buckets_buffer, CL_TRUE, 0, buckets.size() * 8, buckets.data());
+    std::wcout << "ERB done..." << error << std::endl;
     if (error != CL_SUCCESS) {
         std::wcout << "OpenCL computation failed" << error << std::endl;
         exit(-1);
