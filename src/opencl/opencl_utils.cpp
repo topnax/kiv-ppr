@@ -8,8 +8,7 @@ bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
-    if (!platforms.empty()) {
-        auto platform = platforms.front();
+    for (const auto &platform: platforms)  {
         std::vector<cl::Device> devices;
         platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
