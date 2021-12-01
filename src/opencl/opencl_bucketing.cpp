@@ -36,10 +36,19 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
 
     cl_int error;
     // prepare an input buffer to which read data will be passed
-    cl::Buffer input_buffer(context, CL_MEM_READ_WRITE, buffer_size);
+    cl::Buffer input_buffer(context, CL_MEM_READ_WRITE, buffer_size, nullptr, &error);
+    if (error != CL_SUCCESS) {
+        std::wcout << "OpenCL buffer 1 setup failed" << error << std::endl;
+        exit(-1);
+    }
 
     // prepare the buckets buffer
-    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, BUCKET_COUNT * NUMBER_SIZE_BYTES);
+    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, BUCKET_COUNT * NUMBER_SIZE_BYTES, nullptr, &error);
+    if (error != CL_SUCCESS) {
+        std::wcout << "OpenCL buffer 2 setup failed" << error << std::endl;
+        exit(-1);
+    }
+
 
     // prepare the command queue
     cl::CommandQueue queue(context, dev);

@@ -21,7 +21,7 @@ const int NUMBER_SIZE_BITS = NUMBER_SIZE_BYTES * 8;
 const uint64_t NUMBER_MAX = 0xFFFFFFFFFFFFFFFFu;
 
 // number of bits kept when calculating a bucket index
-const int BUCKET_BITS = 20;
+const int BUCKET_BITS = 17;
 
 // number of bits to shift the loaded number by
 const int NUMBER_SHIFT = NUMBER_SIZE_BITS - BUCKET_BITS;
