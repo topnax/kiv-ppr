@@ -7,6 +7,9 @@
 
 const std::string create_buckets_source = R"CLC(
 
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+#pragma OPENCL EXTENSION cl_khr_int64_extended_atomics : enable
+
 #define DOUBLE_FLOAT_EXPONENT_MASK 0x7FF0000000000000
 #define DOUBLE_FLOAT_MANTISSA_MASK 0xFFFFFFFFFFFFF
 
