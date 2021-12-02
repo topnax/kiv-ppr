@@ -8,13 +8,17 @@ bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
-    if (!platforms.empty()) {
-        auto platform = platforms.front();
+    // iterate over all platforms
+    for (const auto &platform: platforms) {
         std::vector<cl::Device> devices;
+
+        // accept all devices
         platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
-        for (const auto &device: devices)  {
+        // check whether the given device was found
+        for (const auto &device: devices) {
             std::string name = device.getInfo<CL_DEVICE_NAME>();
+            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
             if (device_name == name) {
                 // device found
                 out_device = device;
@@ -27,7 +31,8 @@ bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
     return false;
 }
 
-cl::Program get_program(const std::string &program_content, const std::string &program_name, cl::Context &context, cl::Device &dev) {
+cl::Program get_program(const std::string &program_content, const std::string &program_name, cl::Context &context,
+                        cl::Device &dev) {
     cl::Program program(context, program_content);
 
     auto error = program.build("-cl-std=CL2.0");
