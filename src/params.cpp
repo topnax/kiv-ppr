@@ -5,6 +5,7 @@
 #include <fstream>
 #include "params.h"
 #include "opencl/opencl_utils.h"
+#include <algorithm>
 
 bool parse_params_from_args(int argc, char *argv[], parameters &parameters) {
     if (argc != 4) {

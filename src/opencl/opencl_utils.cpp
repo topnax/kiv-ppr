@@ -3,6 +3,7 @@
 //
 #include <iostream>
 #include "opencl_utils.h"
+#include <algorithm>
 
 bool cl_get_device(const std::string &device_name, cl::Device &out_device) {
     std::vector<cl::Platform> platforms;
