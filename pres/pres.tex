@@ -1,0 +1,254 @@
+\documentclass[xcolor=dvipsnames]{beamer}
+%\usepackage[utf8]{inputenc}
+%\usepackage{xcolor}
+\usepackage[pdftex]{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes}
+\usepackage{caption}
+%\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+%\usepackage[utf8]{vietnam}
+\usepackage{pdfpages}
+\usepackage{color}
+\usepackage{booktabs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{lipsum}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{pgf}
+\usepackage{etex}
+\usepackage{tikz,pgfplots}
+
+\tikzstyle{every picture}+=[remember picture]
+% By default all math in TikZ nodes are set in inline mode. Change this to
+% displaystyle so that we don't get small fractions.
+\everymath{\displaystyle}
+
+
+\usetheme{Madrid}
+%\usetheme{Madrid}
+%\usecolortheme[named=Maroon]{structure}
+%\usecolortheme{crane}
+\usefonttheme{professionalfonts}
+\useoutertheme{infolines}
+\useinnertheme{circles}
+
+\newtheorem*{bem}{Bemerkung}
+
+\usepackage{tikz}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{1,0.6,0}
+\definecolor{gray}{rgb}{1,1,0}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\beamertemplatenavigationsymbolsempty 
+
+\title[závěrečná prezentace SP] %optional
+{Hledání percentilu v souboru}
+
+\subtitle{závěrečná prezentace SP z KIV/PPR}
+
+% \title[Západočeská univerzita v Plzni]{\includegraphics[width=\textwidth/4]{img/logo.png}}
+
+\institute[ZČU FAV] % (optional)
+{
+    Západočeská univerzita v Plzni
+    \and
+    Fakulta aplikovaných věd
+}
+
+\author[Stanislav Král]  % (optional, for multiple authors)
+{Stanislav Král \\\tiny{(A20N0091P)}}
+
+%\logo{\includegraphics[height=1.5cm]{img/KIV\_ram\_cerna.pdf}}
+
+\logo{\pgfimage[height=0.5cm]{img/kiv-logo.pdf}}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Úvod}
+	\begin{itemize}
+        \item oproti původním diagramům CF a DF pouze minimální nepodstatné změny
+        \item navržený algoritmus využívající bitový posun pro výpočet indexu bucketu se osvědčil jako velmi efektivní
+        \begin{itemize}
+            \item následný návrh efektivní paralelizace nebyl jednoduchý 
+        \end{itemize}
+  	\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Poznatky z vypracovávání I.}
+    \begin{itemize}
+        \item v některých případech má použití klíčového slova \texttt{inline} velký (pozitivní) výkonostní dopad
+        \begin{itemize}
+            \item hlavně pozorováno u klasifikace validity zpracovávaného čísla
+            \item vlastní implementace \texttt{std::fpclassify} rychlejší (z učiněných pozorování až o desítky procent)
+        \end{itemize}
+        \item velikost bufferu při čtení ze souboru výrazně ovlivňuje rychlost celého výpočtu
+        \begin{itemize}
+            \item optimální velikost se liší u jednotlivých variant výpočtu (\texttt{single}, \texttt{SMP} a OpenCL)
+        \end{itemize}
+        \item vytvoření třídy pro čtení dat ze souboru s využitím bufferu za účelem sdílení kódu mezi varianty výpočtu vedlo k celkovému zpomalení výpočtů
+        \begin{itemize}
+            \item z tohoto důvodu není kód čtení ze souboru sdílený a opakuje se
+            \item z učiněných pozorování až desítky procent
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Poznatky z vypracovávání II.}
+    \begin{itemize}
+        \item SMP původně implementováno pomocí \texttt{parallel\_for}, avšak pomalé, následně nahrazeno implementací pomocí \texttt{flow\_graph}
+        \item dokumentace knihovny TBB je dle mého názoru nedostatečná, což mi výrazně ztěžovalo implementaci SMP
+        \begin{itemize}
+            \item nesrozumitelné chyby během překladu a nedostatek příkladů použití konstrukcí \texttt{flow\_graph}
+        \end{itemize}
+
+        \item u optimalizace OpenCL výpočtu hraje podstatnou roli počet zápisu/čtení do/z OpenCL bufferů
+        \begin{itemize}
+            \item původní implementace výpočtu, kdy bylo OpenCL zařízení využíváno jen k realizaci bitových posunů, trvala jednou tolik času, než sériová implemetace
+            \item následná úprava výpočtu tak, aby byl celý histogram sestavován na OpenCL zařízení, výrazně zrychlila tento výpočet
+            \item dle naměřených výsledků je pak urychlení oproti sériovému výpočtu 1.32
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Poznatky z vypracovávání III.}
+    \begin{itemize}
+        \item výpočet je mnohem rychlejší na OS Linux než na OS Microsoft Windows
+        \begin{itemize}
+            \item na Linuxu dochází k jevu, kdy opakovaná spuštění programu nad jedním a tím samým souborem jsou rychlejší
+            \item na souboru s obrazem OS Ubuntu se jednalo o zrychlení i několika sekund
+        \end{itemize}
+        \item během testování na Intel HD zjištěno, že některá volání vytváření OpenCL bufferu a zápisu do něj, která na zařízeních NVidia a AMD fungují v pořádku, na tomto zařízení nefungují zcela správně
+        \begin{itemize}
+            \item bylo třeba provést drobné úpravy kódu na straně C++
+            \item samotný OpenCL kód zůstal stejný
+        \end{itemize}
+        \item nesprávná práce s OpenCL zařízením má na OS Linux schopnost shodit celý systém
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Výsledky}
+    \begin{table}
+        \begin{center}
+            \begin{tabular}{|c||c|c|c|c||c|} 
+                 \hline
+                 Zařízení & 1. & 2. & 3. & 4. & Průměr[s] \\ 
+
+                 \hline
+                 \hline
+                  SINGLE &  4.197 & 4.308 & 4.195 & 4.257 & 4.239 \\  
+                  SMP & 5.486 & 5.466 & 5.496 & 5.535 & 5.495 \\
+                  Ellesmere & 3.294 & 3.069 & 3.374 & 3.105 & 3.211 \\
+
+                 \hline
+            \end{tabular}
+        \end{center}
+        \caption{Časy běhů programu při zpracování souboru s obrazem Ubuntu OS (2.7GiB).}
+    \end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Výsledky}
+    \begin{figure}[!ht]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.66\textwidth,
+        ybar=.05cm,
+        xlabel={Soubor},
+        ylabel={Průměrný čas [s]},
+    minor y tick num=2,
+        ytick={0,1,2,3,4,5,6,7,8,9,10},
+        bar width = 4pt,
+        legend style={at={(0.45,0.9)},anchor=west},
+        ticklabel style = {font=\tiny},
+        symbolic x coords={100MiB,200MiB,500MiB,1000MiB,2500MiB,5000MiB},
+        xtick=data]
+        \addplot coordinates {
+            (100MiB,0.192)
+            (200MiB,0.371)
+            (500MiB,0.924)
+            (1000MiB,1.894)
+            (2500MiB,4.67)
+            (5000MiB,9.014)
+        };
+
+        \addplot coordinates {
+            (100MiB,0.248)
+            (200MiB,0.458)
+            (500MiB,1.074)
+            (1000MiB,2.122)
+            (2500MiB,5.16)
+            (5000MiB,10.24)
+        };
+
+        \addplot coordinates {
+            (100MiB,0.434)
+            (200MiB,0.544)
+            (500MiB,0.936)
+            (1000MiB,1.614)
+            (2500MiB,3.082)
+            (5000MiB,5.814)
+        };
+
+
+        \legend {SINGLE, SMP, OpenCL};
+
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Graf zobrazující data naměřená při spouštění programu pro soubory o různých velikostech.}
+\end{figure}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Závěr}
+    \begin{itemize}
+        \item mým hlavním cílem bylo mít co nejrychlejší výpočet
+            \begin{itemize}
+                \item avšak bohužel i někdy za cenu čitelnosti kódu
+                \item např. u SMP za účelem rychlosti výpočtu zvýšeny paměťové nároky (kopie histogramu pro každé vlákno namísto synchronizovaného přístupu k jednomu jedinému)
+            \end{itemize}
+        \item bohužel, sériová verze je při použití všech optimalizací při překladu rychlejší než SMP
+        \begin{itemize}    
+            \item pravěpodobně způsobeno špatným návrhem paralelizace
+            \item možnost prozkoumání do budoucna, zdali neexistuje lepší způsob
+        \end{itemize}    
+    \item na středně výkonném GPU (AMD RX480) výpočet rychlejší než na 12-ti vláknovém procesoru (AMD Ryzen 1600 6C/12T)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\center
+Konec prezentace
+\end{frame}
+
+
+
+\end{document}
+
