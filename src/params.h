@@ -7,8 +7,8 @@
 #include "opencl/opencl_utils.h"
 
 const auto PROGRAM_NAME = "pprsolver";
-const auto PROCESSOR_NAME_SINGLE = "SINGLE";
-const auto PROCESSOR_NAME_SMP = "SMP";
+const auto PROCESSOR_NAME_SINGLE = "single";
+const auto PROCESSOR_NAME_SMP = "smp";
 
 enum class solution_mode {
     SINGLE,

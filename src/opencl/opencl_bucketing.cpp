@@ -16,6 +16,7 @@
 
 
 std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name, cl::Context &context, cl::Device &dev) {
+    const auto bucket_buffer_size = BUCKET_COUNT * NUMBER_SIZE_BYTES;
     std::vector<uint64_t> buckets(BUCKET_COUNT);
     uint64_t buckets_total_items = 0;
 
@@ -23,9 +24,8 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
     std::ifstream fin(file_name, std::ifstream::in | std::ifstream::binary);
 
     // prepare a buffer based on the NUMBER_SIZE_BYTES and NUMBER_BUFFER_SIZE constants
-    auto buffer_size = NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE_OPENCL;
-    std::vector<char> buffer(buffer_size, 0);
-    std::vector<uint64_t> out_buffer(NUMBER_BUFFER_SIZE_OPENCL);
+    const auto input_buffer_size = NUMBER_SIZE_BYTES * NUMBER_BUFFER_SIZE_OPENCL;
+    std::vector<char> file_buffer(input_buffer_size, 0);
 
     cl::Program create_buckets_program = get_program(create_buckets_source, "create_buckets", context, dev);
 
@@ -35,29 +35,34 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
             cl_int      // number of bits to be shifted
     > create_buckets_functor(create_buckets_program, "create_buckets");
 
-    cl_int error;
+    cl_int error = 0;
     // prepare an input buffer to which read data will be passed
-    cl::Buffer input_buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-                            buffer.size(), buffer.data(), &error);
+    cl::Buffer input_buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, (size_t) input_buffer_size, file_buffer.data(), &error);
+
+    if (error != CL_SUCCESS) {
+        std::wcout << "OpenCL failed to create the input buffer: " << error << std::endl;
+        exit(-1);
+    }
 
     // prepare the buckets buffer
-    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE, buckets.size() * NUMBER_SIZE_BYTES, nullptr, &error);
+    cl::Buffer buckets_buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bucket_buffer_size, buckets.data(), &error);
+    if (error != CL_SUCCESS) {
+        std::wcout << "OpenCL failed to create the buckets buffer: " << error << std::endl;
+        exit(-1);
+    }
 
     // prepare the command queue
     cl::CommandQueue queue(context, dev);
 
-    // setup the buckets buffer
-    error = queue.enqueueWriteBuffer(buckets_buffer, CL_TRUE, 0, buckets.size() * NUMBER_SIZE_BYTES, buckets.data());
-
     if (error != CL_SUCCESS) {
-        std::wcout << "OpenCL buffer setup failed" << error << std::endl;
+        std::wcout << "OpenCL failed to write to the buckets buffer: " << error << std::endl;
         exit(-1);
     }
 
     while (true) {
         ThreadWatchdog::kick();
         // read from the file stream
-        fin.read(buffer.data(), buffer.size());
+        fin.read(file_buffer.data(), file_buffer.size());
 
         if (fin.gcount() < NUMBER_SIZE_BYTES) break;
 
@@ -65,16 +70,20 @@ std::pair<std::vector<uint64_t>, uint64_t> create_buckets_opencl(char *file_name
         auto numbers_read = fin.gcount() / NUMBER_SIZE_BYTES;
 
         // write read data to the input buffer
-        error = queue.enqueueWriteBuffer(input_buffer, CL_TRUE, 0, numbers_read * NUMBER_SIZE_BYTES, buffer.data());
+        error = queue.enqueueWriteBuffer(input_buffer, CL_TRUE, 0, input_buffer_size, file_buffer.data());
         if (error != CL_SUCCESS) {
-            std::wcout << "OpenCL failed to write to the input buffer" << error << std::endl;
+            std::wcout << "OpenCL failed to write to the input buffer: " << error << std::endl;
             exit(-1);
         }
 
         // set enqueue args based on the numbers read
         cl::EnqueueArgs args(queue, cl::NDRange(numbers_read), NUMBER_SIZE_BYTES);
 
-        create_buckets_functor(args, input_buffer, buckets_buffer, NUMBER_SHIFT);
+        create_buckets_functor(args, input_buffer, buckets_buffer, NUMBER_SHIFT, error);
+        if (error != CL_SUCCESS) {
+            std::wcout << "OpenCL failed to invoke the kernel functor: " << error << std::endl;
+            exit(-1);
+        }
     }
 
     // read the created histogram back to the main memory
